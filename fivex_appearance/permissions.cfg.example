@@ -1,0 +1,19 @@
+# fivex_appearance ACE permissions
+# Copy relevant lines into your server.cfg (or exec this file) BEFORE ensure.
+# Default is deny for creator reopen. Players need NO ACE for first-join creator or shops.
+
+# Parent node — grants every fivex_appearance permission (including creator reopen).
+add_ace group.admin fivex_appearance allow
+
+# Reopen the full character creator with /appearance after first join.
+# add_ace group.admin fivex_appearance.creator allow
+
+# Reserved for a future staff-remote-set (not implemented in v1).
+# add_ace group.admin fivex_appearance.staff allow
+
+# Attach a principal to the admin group (example):
+# add_principal identifier.license:YOUR_LICENSE_HASH group.admin
+
+# Start AFTER spawnmanager so playerSpawned fires in the expected order:
+# ensure spawnmanager
+# ensure fivex_appearance
