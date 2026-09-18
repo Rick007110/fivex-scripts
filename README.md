@@ -48,4 +48,4 @@ Servers running `fivex_versioncheck` will print an update notice when a newer ta
 
 ## License / authorship
 
-FiveX / 112 Play Theory — Rick V. Rijsewijk.
+FiveX — Rick007110
