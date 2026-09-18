@@ -1,4 +1,4 @@
-local function giveOne(name)
+local function giveWeapon(name)
     local hash = joaat(name)
     if not IsWeaponValid(hash) then
         Notify(L('invalid_weapon'), 'error')
@@ -22,10 +22,11 @@ RegisterNetEvent('fivex_admin:applyWeapon', function(actionId, payload)
             Notify(L('invalid_weapon'), 'error')
             return
         end
-        giveOne(payload.weapon)
+        giveWeapon(payload.weapon)
     elseif actionId == 'weap.giveAll' then
         for i = 1, #WeaponCatalog do
-            local hash = joaat(WeaponCatalog[i].name)
+            local name = WeaponCatalog[i].name
+            local hash = joaat(name)
             if IsWeaponValid(hash) then
                 GiveWeaponToPed(ped, hash, 250, false, false)
             end
@@ -60,7 +61,8 @@ RegisterNetEvent('fivex_admin:applyWeapon', function(actionId, payload)
     elseif actionId == 'weap.maxclip' then
         local _, weap = GetCurrentPedWeapon(ped, true)
         if weap and weap ~= `WEAPON_UNARMED` then
-            SetAmmoInClip(ped, weap, GetMaxAmmoInClip(ped, weap, true))
+            local maxClip = GetMaxAmmoInClip(ped, weap, true)
+            SetAmmoInClip(ped, weap, maxClip)
         end
     end
 end)
