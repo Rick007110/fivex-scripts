@@ -3,7 +3,7 @@ SpectateTarget = nil
 
 local saved = nil
 
-local function restore()
+local function restoreAppearance()
     local ped = PlayerPedId()
     NetworkSetInSpectatorMode(false, ped)
     if saved then
@@ -24,21 +24,23 @@ local function restore()
     saved = nil
 end
 
-function StopSpectate()
+function StopSpectate(_dropped)
     if not Spectating then
-        restore()
+        restoreAppearance()
         return
     end
     Spectating = false
     SpectateTarget = nil
-    restore()
+    restoreAppearance()
     Notify(L('spectate_off'), 'info')
 end
 
 function StartSpectate(serverId)
     serverId = tonumber(serverId)
     if not serverId then return end
-    if Spectating then StopSpectate() end
+    if Spectating then
+        StopSpectate(false)
+    end
     local player = GetPlayerFromServerId(serverId)
     if player == -1 then
         Notify(L('invalid_target'), 'error')
@@ -68,13 +70,13 @@ function StartSpectate(serverId)
             Wait(250)
             local p = GetPlayerFromServerId(SpectateTarget)
             if p == -1 then
-                StopSpectate()
+                StopSpectate(true)
                 Notify(L('spectate_dropped'), 'info')
                 break
             end
             local tped = GetPlayerPed(p)
             if not tped or tped == 0 or not DoesEntityExist(tped) then
-                StopSpectate()
+                StopSpectate(true)
                 Notify(L('spectate_dropped'), 'info')
                 break
             end
@@ -90,5 +92,5 @@ RegisterNetEvent('fivex_admin:spectateStart', function(serverId)
 end)
 
 RegisterNetEvent('fivex_admin:spectateStop', function()
-    StopSpectate()
+    StopSpectate(false)
 end)
