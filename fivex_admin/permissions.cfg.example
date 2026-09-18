@@ -1,0 +1,44 @@
+# fivex_admin ACE permissions
+# Copy relevant lines into your server.cfg (or exec this file).
+# Default is deny. Grant nodes explicitly.
+
+# Parent node — grants every fivex_admin permission.
+add_ace group.admin fivex_admin allow
+
+# Typical staff group (open + self + players, no ban/resources).
+# add_ace group.mod fivex_admin.open allow
+# add_ace group.mod fivex_admin.self allow
+# add_ace group.mod fivex_admin.players allow
+# add_ace group.mod fivex_admin.kick allow
+# add_ace group.mod fivex_admin.warn allow
+# add_ace group.mod fivex_admin.teleport allow
+# add_ace group.mod fivex_admin.spectate allow
+# add_ace group.mod fivex_admin.notes allow
+# add_ace group.mod fivex_admin.audit allow
+
+# Individual nodes (use when you do not grant the parent):
+# add_ace group.admin fivex_admin.open allow
+# add_ace group.admin fivex_admin.self allow
+# add_ace group.admin fivex_admin.players allow
+# add_ace group.admin fivex_admin.kick allow
+# add_ace group.admin fivex_admin.ban allow
+# add_ace group.admin fivex_admin.unban allow
+# add_ace group.admin fivex_admin.warn allow
+# add_ace group.admin fivex_admin.teleport allow
+# add_ace group.admin fivex_admin.spectate allow
+# add_ace group.admin fivex_admin.freeze allow
+# add_ace group.admin fivex_admin.world allow
+# add_ace group.admin fivex_admin.spawn.vehicle allow
+# add_ace group.admin fivex_admin.spawn.weapon allow
+# add_ace group.admin fivex_admin.dev allow
+# add_ace group.admin fivex_admin.resources allow
+# add_ace group.admin fivex_admin.audit allow
+# add_ace group.admin fivex_admin.notes allow
+# add_ace group.admin fivex_admin.spawn.prop allow
+# add_ace group.admin fivex_admin.spawn.ped allow
+
+# Attach a principal to the admin group (example):
+# add_principal identifier.license:YOUR_LICENSE_HASH group.admin
+
+# Ensure this resource starts after your ACE groups are defined:
+# ensure fivex_admin

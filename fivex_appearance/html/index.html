@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FiveX Appearance</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="hidden" role="application" aria-label="FiveX Appearance">
+    <aside id="dock" class="dock">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+            <div class="brand-name">FiveX Appearance</div>
+            <div class="brand-sub" id="brand-sub">Creator</div>
+          </div>
+        </div>
+        <button type="button" class="icon-btn" id="btn-esc" title="Close">Esc</button>
+      </header>
+      <div id="banner" class="banner hidden"></div>
+      <div class="cam-row" id="cam-row">
+        <button type="button" class="btn" data-cam="face">Face</button>
+        <button type="button" class="btn" data-cam="torso">Torso</button>
+        <button type="button" class="btn" data-cam="legs">Legs</button>
+        <button type="button" class="btn active" data-cam="full">Full</button>
+        <span class="cam-hint" id="cam-hint"></span>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Tabs"></nav>
+      <main class="panel" id="panel" tabindex="-1"></main>
+      <footer class="footer">
+        <button type="button" class="btn" id="btn-rand">Randomize</button>
+        <button type="button" class="btn" id="btn-reset">Reset</button>
+        <button type="button" class="btn primary" id="btn-save">Save</button>
+      </footer>
+    </aside>
+  </div>
+
+  <div id="modal" class="overlay hidden" role="dialog" aria-modal="true">
+    <form class="modal" id="modal-form">
+      <h2 id="modal-title">Confirm</h2>
+      <p id="modal-body" class="muted"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="modal-cancel">Cancel</button>
+        <button type="submit" class="btn danger" id="modal-ok">Confirm</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
