@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FiveX Admin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="hidden" role="application" aria-label="FiveX Admin">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <div class="brand-name">FiveX Admin</div>
+          <div class="brand-sub" id="brand-sub">Staff tools</div>
+        </div>
+      </div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        <input id="search" type="search" placeholder="Search actions…" autocomplete="off" spellcheck="false" />
+        <kbd>Ctrl K</kbd>
+      </label>
+      <button type="button" class="icon-btn" id="btn-close" title="Close">Esc</button>
+    </header>
+    <div class="shell">
+      <nav class="rail" id="rail" aria-label="Categories"></nav>
+      <main class="panel" id="panel" tabindex="-1"></main>
+      <aside class="inspector" id="inspector"></aside>
+    </div>
+  </div>
+
+  <div id="palette" class="overlay hidden" role="dialog" aria-modal="true" aria-label="Command palette">
+    <div class="palette">
+      <input id="palette-input" type="text" placeholder="Type a command or keyword…" autocomplete="off" spellcheck="false" />
+      <ul id="palette-list" class="palette-list"></ul>
+      <div class="palette-hint">↑↓ navigate · Enter run · Esc close</div>
+    </div>
+  </div>
+
+  <div id="modal" class="overlay hidden" role="dialog" aria-modal="true">
+    <form class="modal" id="modal-form">
+      <h2 id="modal-title">Confirm</h2>
+      <p id="modal-body" class="muted"></p>
+      <div id="modal-fields"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="modal-cancel">Cancel</button>
+        <button type="submit" class="btn danger" id="modal-ok">Confirm</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="announce" class="announce hidden">
+    <div class="announce-kicker" id="announce-author">Announcement</div>
+    <div id="announce-msg"></div>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
