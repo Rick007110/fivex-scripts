@@ -1,7 +1,7 @@
 Config = {}
 
 Config.Enabled = true
-
+-- This is a test comment for the versioncheck to see if it works yes or no
 Config.BaseChance = 0.08
 Config.SpeedMin = 12.0
 Config.SpeedFull = 28.0
