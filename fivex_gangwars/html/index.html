@@ -1,1 +1,37 @@
-$ref:/workspace/fivex-scripts-mirror/fivex_gangwars/html/index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FiveX Flashpoint</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="hud" class="hud hidden" aria-hidden="true">
+    <div class="hud-card">
+      <div class="hud-header">
+        <span class="hud-title" id="turfName">Flashpoint</span>
+        <span class="hud-hint" id="hint">Leave turf to end</span>
+      </div>
+      <div class="heat-row">
+        <span class="label">HEAT</span>
+        <div class="heat-bar">
+          <div class="heat-fill" id="heatFill"></div>
+        </div>
+        <span class="heat-pct" id="heatPct">0%</span>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Wave</span>
+          <span class="stat-value" id="waveNum">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Kills</span>
+          <span class="stat-value" id="killNum">0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
