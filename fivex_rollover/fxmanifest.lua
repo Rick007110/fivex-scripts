@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'fivex_rollover'
 author 'FiveX'
-version '1.0.3'
+version '1.0.4'
 repository 'Rick007110/fivex-scripts'
 description 'Tire burst can tip cars into a rollover at speed'
 
