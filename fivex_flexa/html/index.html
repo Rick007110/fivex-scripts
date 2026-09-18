@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flexa — Whiz UI</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="root" class="hidden">
+    <div id="device" class="folded" data-wallpaper="default">
+      <div class="device-shell">
+        <div class="display">
+          <header class="status-bar">
+            <div class="status-left">
+              <span class="clock" id="clock">12:00</span>
+              <span class="status-wx" id="status-wx" aria-hidden="true">⛅</span>
+            </div>
+            <div class="status-center">
+              <span class="punch" aria-hidden="true"></span>
+            </div>
+            <div class="status-right">
+              <span class="wifi-ico" aria-hidden="true" title="Wi‑Fi"></span>
+              <span class="signal" aria-hidden="true" title="Signal">
+                <i></i><i></i><i></i><i></i>
+              </span>
+              <span class="battery-pct" id="battery-pct">72</span>
+              <span class="battery" aria-hidden="true" title="Battery">
+                <span class="battery-level"></span>
+              </span>
+            </div>
+          </header>
+
+          <div id="now-bar" class="now-bar hidden" aria-live="polite"></div>
+
+          <main id="screen" class="screen">
+            <section id="home" class="home">
+              <div class="home-scroll">
+                <div class="home-widgets" id="home-widgets">
+                  <article class="glass-card weather-card" id="wx-card">
+                    <div class="wx-top">
+                      <div class="wx-temp" id="wx-temp">14°</div>
+                      <div class="wx-icon" aria-hidden="true">⛅</div>
+                    </div>
+                    <p class="wx-city" id="wx-city">London</p>
+                    <p class="wx-summary" id="wx-summary">Partly cloudy · H:17° L:10°</p>
+                    <div class="wx-days" id="wx-days">
+                      <div class="wx-day"><span>Mon</span><span>🌧️</span><span>15°</span><span class="lo">9°</span></div>
+                      <div class="wx-day"><span>Tue</span><span>⛅</span><span>16°</span><span class="lo">10°</span></div>
+                      <div class="wx-day"><span>Wed</span><span>☀️</span><span>18°</span><span class="lo">11°</span></div>
+                      <div class="wx-day"><span>Thu</span><span>🌤️</span><span>17°</span><span class="lo">10°</span></div>
+                    </div>
+                  </article>
+
+                  <article class="glass-card clock-card" id="clock-card">
+                    <div class="widget-date" id="widget-date">Friday, Sep 18</div>
+                    <div class="widget-time" id="widget-time">00:00</div>
+                    <div class="widget-ampm hidden" id="widget-ampm">PM</div>
+                  </article>
+                </div>
+
+                <div id="home-grid" class="home-grid" role="list"></div>
+              </div>
+
+              <div class="home-chrome">
+                <button type="button" class="search-pill" id="search-pill" aria-label="Search">
+                  <span class="search-ico" aria-hidden="true"></span>
+                  <span>Search</span>
+                </button>
+                <div class="page-dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
+                <div class="home-dock" id="home-dock" role="toolbar" aria-label="Dock"></div>
+              </div>
+            </section>
+
+            <section id="app-panel" class="app-panel hidden">
+              <header class="app-header">
+                <button type="button" id="btn-back" class="btn-back" aria-label="Back">‹</button>
+                <h2 id="app-title">App</h2>
+                <span class="app-header-spacer"></span>
+              </header>
+              <div id="app-body" class="app-body"></div>
+            </section>
+
+            <div id="sheet-root" class="sheet-root hidden" aria-hidden="true">
+              <div class="sheet-backdrop" id="sheet-backdrop"></div>
+              <div class="sheet-panel" id="sheet-panel" role="dialog"></div>
+            </div>
+          </main>
+
+          <nav class="nav-dock" aria-label="Device controls">
+            <button type="button" id="btn-hinge" class="btn-hinge" title="Fold / Unfold" aria-label="Toggle fold">
+              <span class="hinge-icon" aria-hidden="true"></span>
+            </button>
+            <button type="button" id="btn-home" class="home-pill" aria-label="Home"></button>
+            <span class="dock-spacer" aria-hidden="true"></span>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
