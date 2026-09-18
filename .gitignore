@@ -1,0 +1,14 @@
+# Runtime / local
+**/gallery/**
+!**/gallery/.gitkeep
+.DS_Store
+Thumbs.db
+*.psd
+*.PSD
+node_modules/
+cache/
+*.log
+
+# Design refs / huge previews
+**/html/_refs/
+**/EDIT ME.psd
