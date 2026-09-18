@@ -1,0 +1,16 @@
+# FiveX Job Center — ACE
+# Players need NO ace to apply / leave at the ped.
+# Staff tools are default-deny.
+
+# Parent grants every child node.
+add_ace group.admin fivex_jobcenter allow
+
+# Explicit staff node (also covered by the parent):
+#   /setjob [serverId] [coroner|highrise|marina|none]
+add_ace group.admin fivex_jobcenter.staff allow
+
+# Per-identifier:
+# add_ace identifier.license:xxxxxxxx fivex_jobcenter.staff allow
+
+# Ensure this file from server.cfg AFTER ace principals, e.g.:
+# exec permissions.cfg
