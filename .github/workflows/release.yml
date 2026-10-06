@@ -1,0 +1,149 @@
+# Builds a GitHub Release for every resource folder that changed in a push to main.
+#
+# Tag: {resource}-v{version}  (what fivex_versioncheck looks for)
+# Asset: {resource}-v{version}.zip containing the {resource}/ folder, ready to drop into resources/.
+#
+# Version comes from `version '…'` in the folder's fxmanifest.lua. If that version was already released,
+# the patch number is bumped automatically (fxmanifest.lua is updated in a "[skip ci]" commit), so every
+# change always ends up in a new release. Bump the version yourself for minor / major releases.
+#
+# Run it by hand (Actions → Release changed resources → Run workflow) to release specific folders.
+
+name: Release changed resources
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      resources:
+        description: 'Space-separated folders to release (empty = every resource folder)'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Find changed resources
+        id: changed
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
+          EVENT: ${{ github.event_name }}
+          INPUT: ${{ github.event.inputs.resources }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            if [ -n "$INPUT" ]; then
+              dirs="$INPUT"
+            else
+              dirs=$(ls -d */ | tr -d '/')
+            fi
+          elif [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE^{commit}" 2>/dev/null; then
+            # first push / force push to an unknown base: everything counts as changed
+            dirs=$(ls -d */ | tr -d '/')
+          else
+            dirs=$(git diff --name-only "$BEFORE" "$AFTER" | grep '/' | cut -d/ -f1 | sort -u || true)
+          fi
+          list=""
+          for d in $dirs; do
+            case "$d" in .*) continue ;; esac
+            [ -f "$d/fxmanifest.lua" ] && list="$list $d"
+          done
+          list=$(echo "$list" | xargs)
+          echo "Resources: ${list:-<none>}"
+          echo "list=$list" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve versions (auto-bump patch when already released)
+        if: steps.changed.outputs.list != ''
+        id: versions
+        env:
+          LIST: ${{ steps.changed.outputs.list }}
+        run: |
+          set -euo pipefail
+          git fetch --tags --force
+          : > releases.txt
+          bumped=""
+          for res in $LIST; do
+            manifest="$res/fxmanifest.lua"
+            ver=$(sed -n "s/^[[:space:]]*version[[:space:]]*['\"]\([^'\"]*\)['\"].*/\1/p" "$manifest" | head -n1)
+            if [ -z "$ver" ]; then
+              echo "::warning::$res has no version in fxmanifest.lua — skipped"
+              continue
+            fi
+            if git rev-parse -q --verify "refs/tags/$res-v$ver" >/dev/null; then
+              IFS=. read -r major minor patch <<< "$ver"
+              new="${major:-0}.${minor:-0}.$(( ${patch:-0} + 1 ))"
+              while git rev-parse -q --verify "refs/tags/$res-v$new" >/dev/null; do
+                IFS=. read -r major minor patch <<< "$new"
+                new="$major.$minor.$(( patch + 1 ))"
+              done
+              sed -i "0,/^\([[:space:]]*version[[:space:]]*\)['\"][^'\"]*['\"]/s//\1'$new'/" "$manifest"
+              echo "$res: $ver already released → $new"
+              ver="$new"
+              bumped="$bumped $res"
+            fi
+            echo "$res $ver" >> releases.txt
+          done
+          if [ -n "$bumped" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            git add -- $(for r in $bumped; do echo "$r/fxmanifest.lua"; done)
+            git commit -m "chore(release): bump$bumped [skip ci]"
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push origin HEAD:main && break
+              sleep 3
+            done
+          fi
+          cat releases.txt
+
+      - name: Build zips and publish releases
+        if: steps.changed.outputs.list != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          while read -r res ver; do
+            [ -n "$res" ] || continue
+            tag="$res-v$ver"
+            if gh release view "$tag" >/dev/null 2>&1; then
+              echo "$tag already exists — skipped"
+              continue
+            fi
+            zip -qr "dist/$tag.zip" "$res" -x "*/.git*" "*/node_modules/*"
+
+            prev=$(git tag --list "$res-v*" --sort=-v:refname | grep -vx "$tag" | head -n1 || true)
+            {
+              echo "## $res v$ver"
+              echo
+              if [ -n "$prev" ]; then
+                echo "Changes since \`$prev\`:"
+                echo
+                git log --no-merges --pretty='- %s (%h)' "$prev..HEAD" -- "$res" | grep -v '\[skip ci\]' || true
+              else
+                echo "First release of \`$res\`."
+              fi
+              echo
+              echo "Install: unzip into your \`resources/\` folder (e.g. \`resources/[fivex]/\`) and \`ensure $res\`."
+            } > notes.md
+
+            gh release create "$tag" "dist/$tag.zip" \
+              --target "$(git rev-parse HEAD)" \
+              --title "$res v$ver" \
+              --notes-file notes.md \
+              --latest=false
+            echo "Released $tag"
+          done < releases.txt

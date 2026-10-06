@@ -8,33 +8,49 @@
 </head>
 <body>
   <div id="app" class="hidden" role="application" aria-label="FiveX Appearance">
-    <aside id="dock" class="dock">
-      <header class="topbar">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true"></span>
-          <div>
-            <div class="brand-name">FiveX Appearance</div>
-            <div class="brand-sub" id="brand-sub">Creator</div>
-          </div>
+    <aside id="dock" class="store">
+      <header class="store-head">
+        <div class="store-title">
+          <div class="store-mode" id="brand-sub">Clothing store</div>
+          <h1 id="tab-title">Tops</h1>
         </div>
-        <button type="button" class="icon-btn" id="btn-esc" title="Close">Esc</button>
+        <div class="head-actions">
+          <button type="button" class="hbtn" id="btn-rand" title="Randomize this category">
+            <svg viewBox="0 0 24 24"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+          </button>
+          <button type="button" class="hbtn" id="btn-reset" title="Back to your saved look">
+            <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+        </div>
       </header>
+
+      <nav class="groups" id="groups" aria-label="Groups"></nav>
+      <nav class="cats" id="tabs" aria-label="Categories"></nav>
       <div id="banner" class="banner hidden"></div>
-      <div class="cam-row" id="cam-row">
-        <button type="button" class="btn" data-cam="face">Face</button>
-        <button type="button" class="btn" data-cam="torso">Torso</button>
-        <button type="button" class="btn" data-cam="legs">Legs</button>
-        <button type="button" class="btn active" data-cam="full">Full</button>
-        <span class="cam-hint" id="cam-hint"></span>
-      </div>
-      <nav class="tabs" id="tabs" aria-label="Tabs"></nav>
+
       <main class="panel" id="panel" tabindex="-1"></main>
-      <footer class="footer">
-        <button type="button" class="btn" id="btn-rand">Randomize</button>
-        <button type="button" class="btn" id="btn-reset">Reset</button>
-        <button type="button" class="btn primary" id="btn-save">Save</button>
+
+      <footer class="store-foot">
+        <button type="button" class="btn ghost" id="btn-esc">Cancel</button>
+        <button type="button" class="btn primary" id="btn-save">
+          <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><span>Save look</span>
+        </button>
       </footer>
     </aside>
+
+    <div class="cam" id="cam-row">
+      <div class="cam-pills">
+        <button type="button" data-cam="face">Face</button>
+        <button type="button" data-cam="torso">Torso</button>
+        <button type="button" data-cam="legs">Legs</button>
+        <button type="button" class="active" data-cam="full">Full</button>
+        <span class="sep"></span>
+        <button type="button" id="cam-flip" title="Turn around (Space)">
+          <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        </button>
+      </div>
+      <div class="cam-hint" id="cam-hint">Drag to rotate · Scroll to zoom · Space to turn</div>
+    </div>
   </div>
 
   <div id="modal" class="overlay hidden" role="dialog" aria-modal="true">
@@ -43,7 +59,7 @@
       <p id="modal-body" class="muted"></p>
       <div class="modal-actions">
         <button type="button" class="btn ghost" id="modal-cancel">Cancel</button>
-        <button type="submit" class="btn danger" id="modal-ok">Confirm</button>
+        <button type="submit" class="btn primary" id="modal-ok">Confirm</button>
       </div>
     </form>
   </div>

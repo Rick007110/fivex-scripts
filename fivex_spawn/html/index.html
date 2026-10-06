@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Choose spawn</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="screen" class="screen hidden">
+    <div class="vignette" aria-hidden="true"></div>
+
+    <aside class="panel">
+      <div class="head">
+        <div class="eyebrow">112 Play Theory</div>
+        <h1 id="welcome">Welcome back</h1>
+        <p>Choose where you want to start.</p>
+      </div>
+      <div class="list" id="list" role="listbox" aria-label="Spawn locations"></div>
+      <div class="foot">
+        <button type="button" class="cta" id="spawn">
+          <span>Spawn here</span>
+          <span class="cta-sub" id="spawn-sub"></span>
+        </button>
+        <div class="hints"><kbd>↑</kbd><kbd>↓</kbd> choose · <kbd>Enter</kbd> spawn</div>
+      </div>
+    </aside>
+
+    <section class="place" aria-live="polite">
+      <div class="eyebrow" id="place-area">—</div>
+      <div class="place-name" id="place-name">—</div>
+    </section>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

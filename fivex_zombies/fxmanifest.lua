@@ -4,9 +4,9 @@ lua54 'yes'
 
 name 'fivex_zombies'
 author 'FiveX'
-version '1.0.6'
+version '2.1.0'
 repository 'Rick007110/fivex-scripts'
-description 'Staff-triggered zombie apocalypse for vanilla CFX (no framework)'
+description 'Staff-triggered zombie outbreak: wandering dead, hordes, variants (vanilla CFX, no framework)'
 
 ui_page 'html/index.html'
 
@@ -15,7 +15,7 @@ files {
     'html/style.css',
     'html/app.js',
     'html/audio/alarm.ogg',
-    'html/**',
+    'html/fonts/*.woff2',
 }
 
 shared_scripts {
@@ -33,3 +33,4 @@ server_scripts {
 }
 
 dependency 'fivex_versioncheck'
+

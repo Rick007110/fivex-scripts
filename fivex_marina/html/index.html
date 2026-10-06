@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Harbor Authority</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Live HUD (no focus) -->
+  <aside id="hud" class="hud hidden" aria-live="polite">
+    <div class="hud-top">
+      <div class="hud-brand"><span class="logo-dot"></span>HARBOR</div>
+      <div class="hud-rank" id="hud-rank">Deckhand</div>
+      <div class="hud-streak hidden" id="hud-streak" title="Streak bonus"></div>
+    </div>
+    <div class="xpbar"><span id="hud-xp"></span></div>
+    <div class="hud-idle" id="hud-idle">No active contract · <kbd id="hud-key">F5</kbd> tablet</div>
+    <div class="hud-card hidden" id="hud-card">
+      <div class="hud-card-head">
+        <div>
+          <div class="hud-title" id="hud-title"></div>
+          <div class="hud-area" id="hud-area"></div>
+        </div>
+        <div class="hud-timer" id="hud-timer">0:00</div>
+      </div>
+      <div class="hud-meta">
+        <span class="chip express" id="hud-express">EXPRESS</span>
+        <span class="hud-pay" id="hud-pay">$0</span>
+      </div>
+      <ol class="steps" id="hud-steps"></ol>
+      <div class="stars hidden" id="hud-stars"></div>
+    </div>
+  </aside>
+
+  <!-- Refuel gauge -->
+  <div id="gauge" class="gauge hidden">
+    <div class="gauge-label">TANK</div>
+    <div class="gauge-track">
+      <div class="zone ok" id="g-ok"></div>
+      <div class="zone perfect" id="g-perfect"></div>
+      <div class="zone spill" id="g-spill"></div>
+      <div class="gauge-fill" id="g-fill"></div>
+      <div class="gauge-needle" id="g-needle"></div>
+    </div>
+    <div class="gauge-value" id="g-value">0%</div>
+  </div>
+
+  <!-- Completion / failure toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- Rank-up banner -->
+  <div id="promo" class="promo hidden">
+    <div class="promo-kicker">PROMOTED</div>
+    <div class="promo-rank" id="promo-rank"></div>
+    <div class="promo-sub" id="promo-sub"></div>
+  </div>
+
+  <!-- Harbor tablet -->
+  <div id="tablet" class="tablet-wrap hidden" role="dialog" aria-label="Harbor Authority tablet">
+    <div class="tablet">
+      <header class="t-head">
+        <div class="t-brand">
+          <div class="t-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2v14m0 0a4 4 0 0 1-4-4H5a7 7 0 0 0 14 0h-3a4 4 0 0 1-4 4zM9 5h6" /></svg>
+          </div>
+          <div>
+            <div class="t-name">Harbor Authority</div>
+            <div class="t-sub">Puerto Del Sol · Dispatch</div>
+          </div>
+        </div>
+        <nav class="tabs" role="tablist">
+          <button type="button" class="tab active" data-tab="contracts">Contracts</button>
+          <button type="button" class="tab" data-tab="career">Career</button>
+          <button type="button" class="tab" data-tab="board">Leaderboard</button>
+        </nav>
+        <div class="t-right">
+          <div class="shift-chip" id="shift-chip"><span>Shift</span><b id="shift-earned">$0</b></div>
+          <button type="button" class="icon-btn" id="btn-close" title="Close (Esc)">✕</button>
+        </div>
+      </header>
+
+      <section class="t-body" id="view-contracts">
+        <div class="active-banner hidden" id="active-banner">
+          <div><span class="pulse"></span><b id="active-label"></b> in progress</div>
+          <button type="button" class="btn ghost danger" id="btn-cancel">Cancel contract</button>
+        </div>
+        <div class="grid" id="offers"></div>
+        <footer class="t-foot">
+          <span class="muted" id="refresh-in">Board refreshes soon</span>
+          <button type="button" class="btn ghost" id="btn-boat">Request work boat</button>
+        </footer>
+      </section>
+
+      <section class="t-body hidden" id="view-career">
+        <div class="career">
+          <div class="career-hero">
+            <div class="badge" id="c-badge">1</div>
+            <div class="career-main">
+              <div class="kicker">Current rank</div>
+              <div class="career-rank" id="c-rank">Deckhand</div>
+              <div class="xpbar big"><span id="c-xp"></span></div>
+              <div class="muted small" id="c-xptext"></div>
+            </div>
+            <div class="career-mult">
+              <div class="kicker">Pay rate</div>
+              <div class="big-num" id="c-mult">×1.00</div>
+            </div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="kicker">Contracts</div><div class="big-num" id="c-jobs">0</div></div>
+            <div class="stat"><div class="kicker">Lifetime earnings</div><div class="big-num" id="c-earned">$0</div></div>
+            <div class="stat"><div class="kicker">Best streak</div><div class="big-num" id="c-best">0</div></div>
+            <div class="stat"><div class="kicker">Work boat</div><div class="big-num sm" id="c-boat">—</div></div>
+          </div>
+          <div class="ladder" id="c-ladder"></div>
+        </div>
+      </section>
+
+      <section class="t-body hidden" id="view-board">
+        <div class="lb">
+          <div class="lb-head"><span>#</span><span>Captain</span><span>Rank</span><span>Contracts</span><span>Earned</span></div>
+          <div id="lb-rows"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Shift summary -->
+  <div id="summary" class="modal-wrap hidden" role="dialog" aria-label="Shift summary">
+    <div class="modal">
+      <div class="kicker">Shift complete</div>
+      <div class="modal-title">Nice work out there, captain.</div>
+      <div class="sum-grid">
+        <div><div class="kicker">On duty</div><div class="big-num" id="s-time">0m</div></div>
+        <div><div class="kicker">Contracts</div><div class="big-num" id="s-jobs">0</div></div>
+        <div><div class="kicker">Earned</div><div class="big-num ok" id="s-earned">$0</div></div>
+        <div><div class="kicker">XP gained</div><div class="big-num" id="s-xp">0</div></div>
+        <div><div class="kicker">Best streak</div><div class="big-num" id="s-streak">0</div></div>
+        <div><div class="kicker">Failed</div><div class="big-num" id="s-fails">0</div></div>
+      </div>
+      <div class="xpbar big"><span id="s-xpbar"></span></div>
+      <div class="muted small" id="s-rank"></div>
+      <button type="button" class="btn primary wide" id="btn-summary">Close</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

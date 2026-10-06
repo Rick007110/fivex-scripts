@@ -1,0 +1,16 @@
+# FiveX Bank — ACE
+# Players need NO ace to bank.
+# Staff tools are default-deny.
+
+# Parent grants every child node.
+add_ace group.admin fivex_bank allow
+
+# Explicit staff node (also covered by the parent):
+#   /bankgive [serverId] [amount]   /banktake [serverId] [amount]   /bankset [serverId] [amount]
+add_ace group.admin fivex_bank.staff allow
+
+# Per-identifier:
+# add_ace identifier.license:xxxxxxxx fivex_bank.staff allow
+
+# Ensure this file from server.cfg AFTER ace principals, e.g.:
+# exec permissions.cfg

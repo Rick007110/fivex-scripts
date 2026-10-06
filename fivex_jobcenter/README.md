@@ -1,8 +1,8 @@
-# fivex_jobcenter v1.0.1
+# fivex_jobcenter v1.1.0
 
 Standalone job board for FiveX. Vanilla CFX — no QB / ESX / Qbox / ox_lib.
 
-Players apply and leave at the clerk. Pay is a KVP dollar integer (no money items). Duty is always off on join; workplaces clock you in.
+Players apply and leave at the clerk. Pay is a dollar integer stored in MySQL (no money items). Duty is always off on join; workplaces clock you in.
 
 ## Ensure
 
@@ -29,12 +29,14 @@ Ped `a_m_y_business_03` with clipboard. Blip 407 / colour 3.
 
 E at the clerk also opens the board. Players need **no ACE** to apply or leave.
 
-## Persistence
+## Persistence (MySQL via oxmysql)
 
-| KVP | Value |
+Requires **oxmysql** (`ensure oxmysql` before this resource). Tables are created on first start, and existing KVP data is imported once (the KVP entries are left untouched).
+
+| Table | Key → value |
 |---|---|
-| `fivex_job_v1:<license>` | job id or empty |
-| `fivex_job_pay_v1:<license>` | integer dollars |
+| `fivex_jobcenter_job` | `license` → `job` id or empty |
+| `fivex_jobcenter_pay` | `license` → `cash` (integer dollars) |
 
 No license → apply fails (notify). Duty is not persisted.
 
@@ -50,7 +52,13 @@ SetDuty(src, bool) -> bool          -- only if HasJob
 AddPay(src, amount, reason) -> newBalance|nil   -- 1..5000, duty required, 20/30s
 GetPay(src) -> int
 SetJob(src, jobId|nil, actorSrc?) -> bool
+AddCash(src, amount) -> newBalance|nil      -- trusted resources only
+RemoveCash(src, amount) -> newBalance|nil   -- trusted resources only, nil if short
 ```
+
+The pay wallet doubles as the player's **cash**. `AddCash` / `RemoveCash` skip the duty gate and the
+5000 clamp (cap `Config.CashClamp`), so only resources listed in `Config.TrustedResources`
+(default `fivex_bank`, `fivex_dealership`) may call them.
 
 `SetJob` from another resource requires `actorSrc` with ACE `fivex_jobcenter.staff` (or parent `fivex_jobcenter`). Calling from this resource (including `/setjob`) does not.
 

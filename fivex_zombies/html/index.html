@@ -7,20 +7,87 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div id="overlay" class="overlay hidden" aria-live="assertive" aria-atomic="true">
-    <div class="frame" id="frame">
-      <div class="eyebrow" id="eyebrow">FIVEX · EVENT</div>
-      <h1 class="title" id="title">APOCALYPSE</h1>
-      <p class="subtitle" id="subtitle">All civs infected — prepare</p>
-      <div class="grace hidden" id="grace-wrap">
-        <span class="grace-label">GRACE</span>
-        <span class="grace-val" id="grace">0</span>
-        <span class="grace-unit">s</span>
+  <!-- Start / stop takeover: an emergency broadcast -->
+  <section id="alert" class="alert hidden" aria-live="assertive" aria-atomic="true">
+    <div class="alert-tint" aria-hidden="true"></div>
+    <div class="alert-scan" aria-hidden="true"></div>
+
+    <header class="alert-band">
+      <span class="band-dot"></span>
+      <span class="band-label" id="alert-eyebrow">Emergency Alert System</span>
+      <span class="band-sep"></span>
+      <span class="band-meta" id="alert-meta">Los Santos County</span>
+    </header>
+
+    <div class="alert-body">
+      <h1 class="alert-title" id="alert-title" data-text="Outbreak">Outbreak</h1>
+      <p class="alert-sub" id="alert-sub"></p>
+
+      <div class="countdown hidden" id="countdown">
+        <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+          <circle class="ring-track" cx="60" cy="60" r="52"></circle>
+          <circle class="ring-fill" id="ring-fill" cx="60" cy="60" r="52"></circle>
+        </svg>
+        <div class="count-num"><span id="count">10</span><small>s</small></div>
+        <div class="count-label">until infection</div>
       </div>
-      <div class="rule" aria-hidden="true"></div>
-      <p class="brand">112 Play Theory</p>
+
+      <div class="summary hidden" id="summary">
+        <div class="sum-item"><span class="sum-val" id="sum-kills">0</span><span class="sum-key">Zombies killed</span></div>
+        <div class="sum-item"><span class="sum-val" id="sum-time">0:00</span><span class="sum-key">Survived</span></div>
+      </div>
     </div>
+
+    <footer class="ticker" aria-hidden="true">
+      <div class="ticker-track" id="ticker"></div>
+    </footer>
+  </section>
+
+  <!-- Live outbreak HUD -->
+  <aside id="hud" class="hud hidden" aria-hidden="true">
+    <div class="hud-head">
+      <span class="hud-dot"></span>
+      <span class="hud-name" id="hud-name">Outbreak</span>
+      <span class="hud-time" id="hud-time">0:00</span>
+    </div>
+
+    <div class="threat" id="threat" data-level="0">
+      <div class="threat-row">
+        <span class="threat-key">Threat</span>
+        <span class="threat-val" id="threat-val">Calm</span>
+      </div>
+      <div class="threat-bar"><i></i><i></i><i></i><i></i></div>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span class="stat-val" id="hud-nearby">0</span><span class="stat-key">Nearby</span></div>
+      <div class="stat stat-hot"><span class="stat-val" id="hud-hunting">0</span><span class="stat-key">Hunting</span></div>
+      <div class="stat"><span class="stat-val" id="hud-kills">0</span><span class="stat-key">Kills</span></div>
+    </div>
+
+    <div class="infect" id="infect">
+      <div class="infect-row">
+        <span class="infect-key" id="infect-key">Infection</span>
+        <span class="infect-val" id="infect-val">0/5</span>
+      </div>
+      <div class="pips" id="pips"></div>
+    </div>
+
+    <div class="night hidden" id="night">
+      <span class="moon" aria-hidden="true"></span>Night: stalkers are out
+    </div>
+  </aside>
+
+  <!-- Horde warning -->
+  <div id="toast" class="toast hidden" aria-live="polite">
+    <div class="toast-icon" aria-hidden="true"><span></span><span></span><span></span></div>
+    <div class="toast-text">
+      <div class="toast-title" id="toast-title">Horde inbound</div>
+      <div class="toast-sub" id="toast-sub">Coming from the north</div>
+    </div>
+    <div class="toast-count" id="toast-count">9</div>
   </div>
+
   <script src="app.js"></script>
 </body>
 </html>

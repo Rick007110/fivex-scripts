@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'fivex_jobcenter'
 author 'FiveX'
-version '1.0.1'
+version '1.1.0'
 repository 'Rick007110/fivex-scripts'
 description 'Standalone job board — apply, pay wallet, duty state'
 
@@ -28,8 +28,12 @@ client_scripts {
 }
 
 server_scripts {
+    '@oxmysql/lib/MySQL.lua',
     'server/versioncheck.lua',
+    'server/db.lua',
     'server/main.lua',
 }
 
+dependency 'oxmysql'
 dependency 'fivex_versioncheck'
+

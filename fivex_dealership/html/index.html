@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FiveX Dealership</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ============ SHOWROOM ============ -->
+  <div id="showroom" class="screen hidden" aria-label="Vehicle showroom">
+    <div class="stage" id="stage" title="Drag to rotate"></div>
+    <div class="vignette vignette-showroom" aria-hidden="true"></div>
+
+    <header class="topbar anim-down">
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 15.5v-3l2.6-4.6h12.8L21 12.5v3"/><path d="M2.5 15.5h19"/><circle cx="7" cy="16" r="1.9"/><circle cx="17" cy="16" r="1.9"/></svg>
+        </div>
+        <div>
+          <div class="eyebrow">Dealership</div>
+          <div class="brand-title" id="s-location">Premium Deluxe Motorsport</div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="wallet">
+          <span class="wallet-icon bank" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10h18"/></svg></span>
+          <div><div class="wallet-label">Bank</div><div class="wallet-value" id="s-bank">$0</div></div>
+        </div>
+        <div class="wallet">
+          <span class="wallet-icon cash" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="10" rx="2"/><circle cx="12" cy="12" r="2.4"/></svg></span>
+          <div><div class="wallet-label">Cash</div><div class="wallet-value" id="s-cash">$0</div></div>
+        </div>
+        <button type="button" class="btn-glass" id="btn-owned">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5V20H4z"/><path d="M9 20v-5h6v5"/></svg>
+          My vehicles <span class="pill" id="owned-count">0/10</span>
+        </button>
+        <button type="button" class="btn-glass btn-close" id="s-close"><kbd>ESC</kbd> Close</button>
+      </div>
+    </header>
+
+    <nav class="rail anim-left" id="rail" aria-label="Categories"></nav>
+
+    <aside class="info glass anim-right" id="info" aria-live="polite">
+      <div class="info-head">
+        <div class="eyebrow accent" id="i-brand">—</div>
+        <h1 class="model" id="i-model">—</h1>
+        <div class="meta" id="i-meta">—</div>
+      </div>
+
+      <div class="price-block">
+        <div class="price-label">Price</div>
+        <div class="price" id="i-price">$0</div>
+      </div>
+
+      <div class="stats" id="i-stats">
+        <div class="stat"><div class="stat-top"><span>Top speed</span><b id="v-speed">—</b></div><div class="meter"><span data-bar="speed"></span></div></div>
+        <div class="stat"><div class="stat-top"><span>Acceleration</span><b data-num="accel">—</b></div><div class="meter"><span data-bar="accel"></span></div></div>
+        <div class="stat"><div class="stat-top"><span>Braking</span><b data-num="braking">—</b></div><div class="meter"><span data-bar="braking"></span></div></div>
+        <div class="stat"><div class="stat-top"><span>Traction</span><b data-num="traction">—</b></div><div class="meter"><span data-bar="traction"></span></div></div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Paint <span id="i-paint">—</span></div>
+        <div class="swatches" id="swatches" role="radiogroup" aria-label="Paint"></div>
+      </div>
+
+      <div class="section">
+        <div class="section-label">Payment</div>
+        <div class="segmented" role="radiogroup" aria-label="Payment method">
+          <button type="button" role="radio" data-method="bank">
+            <span class="seg-title">Card</span><span class="seg-sub" id="seg-bank">$0</span>
+          </button>
+          <button type="button" role="radio" data-method="cash">
+            <span class="seg-title">Cash</span><span class="seg-sub" id="seg-cash">$0</span>
+          </button>
+        </div>
+      </div>
+
+      <button type="button" class="cta" id="i-buy">Purchase</button>
+      <div class="fine" id="i-fine">Delivered outside · unique plate assigned</div>
+    </aside>
+
+    <section class="dock anim-up" aria-label="Vehicles">
+      <div class="dock-head">
+        <div class="dock-title">
+          <span id="d-title">Compacts</span>
+          <span class="dock-count" id="d-count">0 vehicles</span>
+        </div>
+        <div class="dock-tools">
+          <span class="hint"><kbd>←</kbd><kbd>→</kbd> Browse</span>
+          <span class="hint"><kbd>Drag</kbd> Rotate</span>
+          <label class="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>
+            <input id="d-search" type="text" placeholder="Search all vehicles" autocomplete="off" spellcheck="false" />
+          </label>
+          <div class="select">
+            <select id="d-sort" aria-label="Sort">
+              <option value="price-asc">Price: low to high</option>
+              <option value="price-desc">Price: high to low</option>
+              <option value="name">Name</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="carousel" id="carousel" role="listbox" aria-label="Vehicles"></div>
+    </section>
+
+    <!-- owned drawer -->
+    <aside class="drawer glass hidden" id="drawer" aria-label="My vehicles">
+      <div class="drawer-head">
+        <div>
+          <div class="eyebrow">Your collection</div>
+          <div class="drawer-title">My vehicles</div>
+        </div>
+        <button type="button" class="icon-btn" id="drawer-close" aria-label="Close">
+          <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="vlist" id="owned-list"></div>
+      <div class="drawer-foot" id="owned-note">Park a vehicle in a garage before selling it.</div>
+    </aside>
+  </div>
+
+  <!-- ============ GARAGE ============ -->
+  <div id="garage" class="screen hidden" aria-label="Garage">
+    <div class="vignette vignette-garage" aria-hidden="true"></div>
+    <aside class="gpanel glass anim-right">
+      <div class="drawer-head">
+        <div class="brand">
+          <div class="brand-logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 10.5 12 4l9 6.5V20H3z"/><path d="M7 20v-6h10v6M7 17h10"/></svg>
+          </div>
+          <div>
+            <div class="eyebrow">Garage</div>
+            <div class="brand-title" id="g-location">Garage</div>
+          </div>
+        </div>
+        <button type="button" class="btn-glass btn-close" id="g-close"><kbd>ESC</kbd></button>
+      </div>
+
+      <div class="gwallets">
+        <div class="wallet compact"><div class="wallet-label">Bank</div><div class="wallet-value" id="g-bank">$0</div></div>
+        <div class="wallet compact"><div class="wallet-label">Cash</div><div class="wallet-value" id="g-cash">$0</div></div>
+        <div class="wallet compact"><div class="wallet-label">Owned</div><div class="wallet-value" id="g-owned">0/10</div></div>
+      </div>
+
+      <div class="filters" role="tablist" id="g-filters">
+        <button type="button" role="tab" data-filter="all" aria-selected="true">All</button>
+        <button type="button" role="tab" data-filter="stored" aria-selected="false">Stored</button>
+        <button type="button" role="tab" data-filter="away" aria-selected="false">Out / Lost</button>
+      </div>
+
+      <div class="vlist" id="garage-list"></div>
+      <div class="drawer-foot" id="garage-note"></div>
+    </aside>
+  </div>
+
+  <!-- ============ SHARED ============ -->
+  <div id="modal" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <form class="modal glass" id="modal-form">
+      <div class="eyebrow accent" id="modal-eyebrow">Confirm</div>
+      <h2 id="modal-title">Confirm</h2>
+      <p id="modal-body"></p>
+      <div class="modal-summary hidden" id="modal-summary"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="modal-cancel">Cancel</button>
+        <button type="submit" class="cta small" id="modal-ok">Confirm</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

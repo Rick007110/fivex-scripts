@@ -58,11 +58,21 @@ Config.Locations = {
     { id = 'mrpd',       label = 'Mission Row PD',    x = 428.23,  y = -984.28,  z = 30.71,  w = 90.0 },
     { id = 'hospital',   label = 'Pillbox Hospital',  x = 298.66,  y = -584.47,  z = 43.26,  w = 70.0 },
     { id = 'garage',     label = 'Legion Garage',     x = 215.76,  y = -810.12,  z = 30.73,  w = 340.0 },
-    { id = 'airport',    label = 'Los Santos Airport', x = -1037.0, y = -2737.0, z = 20.17, w = 330.0 },
+    { id = 'airport',    label = 'Los Santos Airport', x = -1037.0, y = -2737.0, z = 20.17,  w = 330.0 },
     { id = 'paleto',     label = 'Paleto Bay',        x = -448.23, y = 6010.12,  z = 31.72,  w = 45.0 },
     { id = 'sandy',      label = 'Sandy Shores',      x = 1848.54, y = 3670.14,  z = 33.93,  w = 210.0 },
     { id = 'prison',     label = 'Bolingbroke Prison', x = 1845.33, y = 2585.94, z = 45.67,  w = 270.0 },
     { id = 'mazebank',   label = 'Maze Bank Roof',    x = -75.15,  y = -819.14,  z = 326.18, w = 350.0 },
+}
+
+-- fivex_admin owns time + weather for everyone (vMenu's sync is off in vMenu/config/permissions.cfg).
+Config.WorldSync = {
+    Enabled = true,
+    StartHour = 12,           -- after a server restart
+    StartWeather = 'CLEAR',
+    StartFrozen = false,
+    MinuteMs = 2000,          -- real ms per in-game minute (2000 = GTA default, 48 min day)
+    SyncInterval = 10000,     -- ms between re-syncs to all players
 }
 
 Config.WeatherPresets = {

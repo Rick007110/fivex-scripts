@@ -73,7 +73,7 @@ local function makeObj(resource, repo, localVersion)
 
     function obj.check()
         if type(repo) ~= 'string' or not repo:find('/') then
-            print(('[fivex_versioncheck] %s: invalid repository %s'):format(resource, tostring(repo)))
+            print(('%s: invalid repository %s'):format(resource, tostring(repo)))
             return
         end
         local owner, name = repo:match('^([^/]+)/([^/]+)$')
@@ -97,7 +97,7 @@ local function makeObj(resource, repo, localVersion)
                     end
                 end
             elseif status and status ~= 200 then
-                print(('[fivex_versioncheck] %s: GitHub HTTP %s'):format(resource, tostring(status)))
+                print(('%s: GitHub HTTP %s'):format(resource, tostring(status)))
             end
 
             local hasNew = false
@@ -105,7 +105,7 @@ local function makeObj(resource, repo, localVersion)
             if best and localSv and cmpSemver(best, localSv) > 0 then
                 hasNew = true
                 last = best.raw
-                print(('^3[fivex_versioncheck]^7 %s: update available ^2%s^7 → ^2%s^7  %s'):format(
+                print(('%s: update available ^2%s^7 → ^2%s^7  %s'):format(
                     resource, tostring(localVersion), last, tostring(bestUrl)
                 ))
             end
@@ -161,13 +161,16 @@ AddEventHandler('fivex_versioncheck:register', function(resource, repo, version,
         return
     end
     if registered[resource] then
-        if type(cb) == 'function' then cb({ success = true, obj = registered[resource], already = true }) end
-        return
+        -- Re-register (resource restarted, maybe after an update): drop the old checker so the
+        -- new local version is used. stop() clears `running` (cancels the pending first check)
+        -- and bumps the generation, so the old timer loop exits when its Wait returns.
+        registered[resource].stop()
+        registered[resource] = nil
     end
     local obj = makeObj(resource, repo ~= '' and repo or 'Rick007110/fivex-scripts', version ~= '' and version or '0.0.0')
     registered[resource] = obj
-    print(('[fivex_versioncheck] registered %s @ %s (repo %s)'):format(resource, version, repo))
+    print(('Registered %s @ %s (repo %s)'):format(resource, version, repo))
     if type(cb) == 'function' then cb({ success = true, obj = obj }) end
 end)
 
-print('^2[fivex_versioncheck]^7 ready — tag releases as {resource}-v{semver}')
+print('Ready — tag releases as {resource}-v{semver}')

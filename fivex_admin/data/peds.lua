@@ -1,0 +1,91 @@
+PedCatalog = {
+    -- Cops
+    { model = 's_m_y_cop_01', label = 'LSPD officer', category = 'Cops' },
+    { model = 's_f_y_cop_01', label = 'LSPD officer (F)', category = 'Cops' },
+    { model = 's_m_y_hwaycop_01', label = 'Highway cop', category = 'Cops' },
+    { model = 's_m_y_sheriff_01', label = 'Sheriff', category = 'Cops' },
+    { model = 's_f_y_sheriff_01', label = 'Sheriff (F)', category = 'Cops' },
+    { model = 's_m_m_snowcop_01', label = 'Snow cop', category = 'Cops' },
+    { model = 's_m_y_swat_01', label = 'SWAT', category = 'Cops' },
+    { model = 's_m_y_ranger_01', label = 'Park ranger', category = 'Cops' },
+    { model = 's_f_y_ranger_01', label = 'Park ranger (F)', category = 'Cops' },
+    { model = 's_m_m_ciasec_01', label = 'CIA security', category = 'Cops' },
+    { model = 's_m_m_fibsec_01', label = 'FIB security', category = 'Cops' },
+    { model = 's_m_m_prisguard_01', label = 'Prison guard', category = 'Cops' },
+    { model = 's_m_m_armoured_01', label = 'Armoured guard', category = 'Cops' },
+    { model = 's_m_m_armoured_02', label = 'Armoured guard 2', category = 'Cops' },
+    { model = 's_m_m_security_01', label = 'Security guard', category = 'Cops' },
+    -- EMS / fire
+    { model = 's_m_m_paramedic_01', label = 'Paramedic', category = 'EMS' },
+    { model = 's_m_m_doctor_01', label = 'Doctor', category = 'EMS' },
+    { model = 's_f_y_scrubs_01', label = 'Nurse', category = 'EMS' },
+    { model = 's_m_m_scientist_01', label = 'Scientist', category = 'EMS' },
+    { model = 's_m_y_autopsy_01', label = 'Coroner', category = 'EMS' },
+    { model = 's_m_y_fireman_01', label = 'Firefighter', category = 'EMS' },
+    -- Civilians
+    { model = 'a_m_y_business_01', label = 'Businessman', category = 'Civilians' },
+    { model = 'a_m_y_business_02', label = 'Businessman 2', category = 'Civilians' },
+    { model = 'a_m_y_business_03', label = 'Businessman 3', category = 'Civilians' },
+    { model = 'a_f_y_business_01', label = 'Businesswoman', category = 'Civilians' },
+    { model = 'a_m_m_business_01', label = 'Businessman (older)', category = 'Civilians' },
+    { model = 'a_m_y_hipster_01', label = 'Hipster', category = 'Civilians' },
+    { model = 'a_m_y_hipster_02', label = 'Hipster 2', category = 'Civilians' },
+    { model = 'a_f_y_hipster_01', label = 'Hipster (F)', category = 'Civilians' },
+    { model = 'a_m_y_skater_01', label = 'Skater', category = 'Civilians' },
+    { model = 'a_m_y_downtown_01', label = 'Downtown', category = 'Civilians' },
+    { model = 'a_m_y_genstreet_01', label = 'Street civilian', category = 'Civilians' },
+    { model = 'a_m_y_vinewood_01', label = 'Vinewood', category = 'Civilians' },
+    { model = 'a_f_y_vinewood_01', label = 'Vinewood (F)', category = 'Civilians' },
+    { model = 'a_m_y_beach_01', label = 'Beach', category = 'Civilians' },
+    { model = 'a_f_y_beach_01', label = 'Beach (F)', category = 'Civilians' },
+    { model = 'a_f_y_fitness_01', label = 'Fitness (F)', category = 'Civilians' },
+    { model = 'a_f_y_runner_01', label = 'Runner (F)', category = 'Civilians' },
+    { model = 'a_m_m_farmer_01', label = 'Farmer', category = 'Civilians' },
+    { model = 'a_m_m_hillbilly_01', label = 'Hillbilly', category = 'Civilians' },
+    { model = 'a_m_y_motox_01', label = 'Motocross', category = 'Civilians' },
+    { model = 'a_m_y_cyclist_01', label = 'Cyclist', category = 'Civilians' },
+    { model = 's_m_y_waiter_01', label = 'Waiter', category = 'Civilians' },
+    { model = 's_f_y_bartender_01', label = 'Bartender (F)', category = 'Civilians' },
+    { model = 's_m_y_chef_01', label = 'Chef', category = 'Civilians' },
+    { model = 's_m_y_construct_01', label = 'Construction', category = 'Civilians' },
+    { model = 's_m_y_construct_02', label = 'Construction 2', category = 'Civilians' },
+    { model = 's_m_y_airworker', label = 'Air worker', category = 'Civilians' },
+    { model = 's_m_y_ammucity_01', label = 'Ammu-Nation clerk', category = 'Civilians' },
+    { model = 'a_f_m_bevhills_01', label = 'Beverly Hills (F)', category = 'Civilians' },
+    { model = 'a_m_y_ktown_01', label = 'Korean town', category = 'Civilians' },
+    { model = 'a_m_m_paparazzi_01', label = 'Paparazzi', category = 'Civilians' },
+    -- Animals (no freemode)
+    { model = 'a_c_chop', label = 'Chop', category = 'Animals' },
+    { model = 'a_c_shepherd', label = 'Shepherd', category = 'Animals' },
+    { model = 'a_c_husky', label = 'Husky', category = 'Animals' },
+    { model = 'a_c_retriever', label = 'Retriever', category = 'Animals' },
+    { model = 'a_c_rottweiler', label = 'Rottweiler', category = 'Animals' },
+    { model = 'a_c_poodle', label = 'Poodle', category = 'Animals' },
+    { model = 'a_c_pug', label = 'Pug', category = 'Animals' },
+    { model = 'a_c_westy', label = 'Westie', category = 'Animals' },
+    { model = 'a_c_cat_01', label = 'Cat', category = 'Animals' },
+    { model = 'a_c_cow', label = 'Cow', category = 'Animals' },
+    { model = 'a_c_deer', label = 'Deer', category = 'Animals' },
+    { model = 'a_c_boar', label = 'Boar', category = 'Animals' },
+    { model = 'a_c_pig', label = 'Pig', category = 'Animals' },
+    { model = 'a_c_hen', label = 'Hen', category = 'Animals' },
+    { model = 'a_c_rabbit_01', label = 'Rabbit', category = 'Animals' },
+    { model = 'a_c_rat', label = 'Rat', category = 'Animals' },
+    { model = 'a_c_crow', label = 'Crow', category = 'Animals' },
+    { model = 'a_c_seagull', label = 'Seagull', category = 'Animals' },
+    { model = 'a_c_pigeon', label = 'Pigeon', category = 'Animals' },
+    { model = 'a_c_mtlion', label = 'Mountain lion', category = 'Animals' },
+    { model = 'a_c_coyote', label = 'Coyote', category = 'Animals' },
+    { model = 'a_c_rhesus', label = 'Rhesus', category = 'Animals' },
+}
+
+function FindPedInCatalog(model)
+    if not model then return nil end
+    model = string.lower(tostring(model))
+    for i = 1, #PedCatalog do
+        if PedCatalog[i].model == model then
+            return PedCatalog[i]
+        end
+    end
+    return nil
+end

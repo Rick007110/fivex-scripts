@@ -1,0 +1,16 @@
+# FiveX Dealership — ACE
+# Players need NO ace to buy, park, recover, or sell.
+# Staff tools are default-deny.
+
+# Parent grants every child node.
+add_ace group.admin fivex_dealership allow
+
+# Explicit staff node (also covered by the parent):
+#   /givecar [serverId] [model]   /takecar [plate]
+add_ace group.admin fivex_dealership.staff allow
+
+# Per-identifier:
+# add_ace identifier.license:xxxxxxxx fivex_dealership.staff allow
+
+# Ensure this file from server.cfg AFTER ace principals, e.g.:
+# exec permissions.cfg

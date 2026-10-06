@@ -1,0 +1,228 @@
+/* FiveX Jobs — tokens match fivex_admin. 8px radius. */
+:root {
+  --bg: #0e1116;
+  --bg-2: #12171e;
+  --surface: #161b22;
+  --surface-2: #1c2330;
+  --surface-3: #232c3b;
+  --border: #2a3341;
+  --border-2: #3a4658;
+  --text: #e6edf3;
+  --muted: #8b9bb0;
+  --faint: #5c6b80;
+  --accent: #5b8def;
+  --accent-2: #3d6fd6;
+  --accent-soft: rgba(91, 141, 239, 0.14);
+  --danger: #e5484d;
+  --danger-soft: rgba(229, 72, 77, 0.14);
+  --warn: #d4a017;
+  --ok: #3d9a6a;
+  --ok-soft: rgba(61, 154, 106, 0.14);
+  --shadow: 0 16px 48px rgba(0, 0, 0, 0.45);
+  --r: 8px;
+  --r2: 6px;
+  --space: 8px;
+  --font: "Segoe UI", "IBM Plex Sans", "Helvetica Neue", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", "Cascadia Mono", ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; }
+html, body {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+  background: transparent;
+  font: 13px/1.4 var(--font);
+  color: var(--text);
+  user-select: none;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
+
+#app {
+  position: absolute;
+  top: 50%;
+  right: 48px;
+  transform: translateY(-50%);
+  width: min(400px, 92vw);
+  max-height: min(740px, 88vh);
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  flex-shrink: 0;
+}
+.brand { display: flex; align-items: center; gap: 10px; flex: 1; }
+.brand-mark {
+  width: 12px; height: 12px; border-radius: 3px;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.brand-name { font-weight: 650; letter-spacing: 0.02em; }
+.brand-sub { font-size: 11px; color: var(--muted); }
+.icon-btn {
+  height: 32px; padding: 0 10px;
+  font-size: 11px; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 4px;
+  background: var(--surface-2);
+}
+.icon-btn:hover { border-color: var(--border-2); color: var(--text); }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px;
+}
+
+.status { margin: 12px; }
+.status-row { display: flex; justify-content: space-between; gap: 12px; }
+.kicker {
+  font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 2px;
+}
+.status-job { font-weight: 650; font-size: 15px; }
+.status-duty { margin-top: 8px; font-size: 12px; }
+
+.jobs {
+  padding: 0 12px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+.job-card h3 { margin: 0 0 4px; font-size: 14px; font-weight: 650; }
+.job-card p { margin: 0 0 10px; color: var(--muted); font-size: 12px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: 32px; padding: 0 12px;
+  border-radius: var(--r2);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+}
+.btn:hover { border-color: var(--border-2); background: var(--surface-3); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent-2); color: #fff; }
+.btn.primary:hover { filter: brightness(1.06); }
+.btn.danger { background: var(--danger-soft); border-color: var(--danger); color: #ffd4d4; }
+.btn.ghost { background: transparent; }
+.btn.block { width: 100%; }
+
+.foot {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-2);
+}
+.foot .hint { margin-left: auto; font-size: 11px; }
+
+.overlay {
+  position: absolute; inset: 0;
+  background: rgba(8, 10, 14, 0.62);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding-top: 18vh;
+  z-index: 20;
+}
+.modal {
+  width: min(380px, 90vw);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.modal h2 { margin: 0 0 8px; font-size: 16px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+
+.toasts {
+  position: absolute; right: 24px; bottom: 24px;
+  display: flex; flex-direction: column; gap: 8px; z-index: 40;
+  pointer-events: none;
+}
+.toast {
+  min-width: 220px; max-width: 360px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 10px 12px;
+  box-shadow: var(--shadow);
+}
+.toast.error { border-color: var(--danger); }
+.toast.success { border-color: var(--ok); }
+.toast.info { border-color: var(--accent); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 99px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-track { background: transparent; }
+
+#work-progress {
+  position: absolute;
+  left: 50%;
+  bottom: 7%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 30;
+}
+.work-progress-ring {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+.work-progress-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  display: block;
+}
+.work-progress-track,
+.work-progress-arc {
+  fill: none;
+  stroke-width: 8;
+}
+.work-progress-track { stroke: var(--border); }
+.work-progress-arc {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-dasharray: 0 263.894;
+  transition: stroke-dasharray 80ms linear;
+}
+@media (prefers-reduced-motion: reduce) {
+  .work-progress-arc { transition: none; }
+}
+.work-progress-pct {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text);
+}
+.work-progress-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}

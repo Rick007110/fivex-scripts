@@ -3,6 +3,9 @@
   Validates runs, kill counts, payday stub. Client never awards money.
 ]]
 
+-- MySQL table (server/db.lua); the first start imports the old KVP data
+FxDB.space('payday', 'fivex_gangwars_payday', 'int', { kvp = Config.PaydayKvpPrefix, key = 'license', value = 'earned' })
+
 local Locale = Locales[Config.Locale] or Locales['en']
 
 local function L(key, ...)
@@ -50,9 +53,8 @@ local function awardPayday(src, waves, kills)
 
     local license = getLicense(src)
     if license then
-        local key = Config.PaydayKvpPrefix .. license
-        local prev = tonumber(GetResourceKvpString(key)) or 0
-        SetResourceKvp(key, tostring(prev + amount))
+        local prev = tonumber(FxDB.get('payday', license)) or 0
+        FxDB.set('payday', license, prev + amount)
     end
 
     TriggerClientEvent('fivex_gangwars:payday', src, amount)
@@ -61,6 +63,26 @@ end
 ---------------------------------------------------------------------------
 -- Run lifecycle (client-initiated; server authoritative for score/pay)
 ---------------------------------------------------------------------------
+
+local function maxPedsForWave(wave)
+    local n = Config.BasePeds + (wave - 1) * Config.PedsPerWave
+    if n > Config.MaxLiveHostiles then n = Config.MaxLiveHostiles end
+    return n
+end
+
+--- Dead = gone (ent 0 / deleted) or synced health / cause of death says so
+local function isNetPedDead(netId)
+    local ent = NetworkGetEntityFromNetworkId(netId)
+    if not ent or ent == 0 or not DoesEntityExist(ent) then return true end
+    if GetEntityHealth(ent) <= 0 then return true end
+    if GetPedCauseOfDeath and (GetPedCauseOfDeath(ent) or 0) ~= 0 then return true end
+    return false
+end
+
+--- Same run still current (token unchanged after a Wait)
+local function runStillValid(src, run)
+    return Runs[src] == run
+end
 
 RegisterNetEvent('fivex_gangwars:startRun', function(token, turfId)
     local src = source
@@ -74,6 +96,9 @@ RegisterNetEvent('fivex_gangwars:startRun', function(token, turfId)
         cleared = 0,
         kills = 0,
         peds = {},
+        seen = {},      -- netIds ever registered this run (no re-use)
+        waveRegs = 0,   -- registrations accepted for the current wave
+        pending = 0,    -- in-flight validation threads
         started = os.time(),
     }
 end)
@@ -83,12 +108,30 @@ RegisterNetEvent('fivex_gangwars:registerPed', function(token, netId)
     local run = Runs[src]
     if not run or run.token ~= token then return end
     if type(netId) ~= 'number' then return end
+    if run.seen[netId] then return end
+    if run.waveRegs >= maxPedsForWave(run.wave) then return end
+    run.seen[netId] = true
+    run.waveRegs = run.waveRegs + 1
 
-    local live = 0
-    for _ in pairs(run.peds) do live = live + 1 end
-    if live >= Config.MaxLiveHostiles then return end
-
-    run.peds[netId] = true
+    -- Clone create can land after the net event; wait briefly for the entity
+    run.pending = run.pending + 1
+    CreateThread(function()
+        local ent = 0
+        local deadline = GetGameTimer() + 1500
+        while GetGameTimer() < deadline do
+            ent = NetworkGetEntityFromNetworkId(netId)
+            if ent and ent ~= 0 and DoesEntityExist(ent) then break end
+            ent = 0
+            Wait(50)
+        end
+        run.pending = run.pending - 1
+        if not runStillValid(src, run) then return end
+        if ent == 0 or GetEntityType(ent) ~= 1 or NetworkGetEntityOwner(ent) ~= src then
+            run.waveRegs = math.max(0, run.waveRegs - 1)
+            return
+        end
+        run.peds[netId] = true
+    end)
 end)
 
 RegisterNetEvent('fivex_gangwars:reportKill', function(token, netId)
@@ -96,30 +139,65 @@ RegisterNetEvent('fivex_gangwars:reportKill', function(token, netId)
     local run = Runs[src]
     if not run or run.token ~= token then return end
     if type(netId) ~= 'number' then return end
-    if not run.peds[netId] then return end
+    if not run.seen[netId] then return end
 
-    run.peds[netId] = nil
-    run.kills = run.kills + 1
+    -- Wait for a pending registration and for death to sync to the server
+    run.pending = run.pending + 1
+    CreateThread(function()
+        local deadline = GetGameTimer() + 2000
+        while GetGameTimer() < deadline do
+            if run.peds[netId] and isNetPedDead(netId) then break end
+            Wait(100)
+        end
+        run.pending = run.pending - 1
+        if not runStillValid(src, run) then return end
+        if not run.peds[netId] or not isNetPedDead(netId) then return end
+        run.peds[netId] = nil
+        run.kills = run.kills + 1
+    end)
 end)
 
 RegisterNetEvent('fivex_gangwars:waveClear', function(token, wave, _clientKills)
     local src = source
     local run = Runs[src]
     if not run or run.token ~= token then return end
-    if type(wave) ~= 'number' or wave < 1 then return end
+    if type(wave) ~= 'number' or wave ~= run.cleared + 1 then return end
 
-    -- Advance cleared count; ignore duplicate / out-of-order
-    if wave > run.cleared then
+    -- Let in-flight register / kill validations settle first
+    run.pending = run.pending + 1
+    CreateThread(function()
+        local deadline = GetGameTimer() + 3000
+        while run.pending > 1 and GetGameTimer() < deadline do
+            Wait(100)
+        end
+        run.pending = run.pending - 1
+        if not runStillValid(src, run) then return end
+        if wave ~= run.cleared + 1 then return end
+        -- Drop peds that are dead/gone but whose kill report never arrived (no kill credit),
+        -- so one lost event can't stall the run forever
+        for netId in pairs(run.peds) do
+            if isNetPedDead(netId) then run.peds[netId] = nil end
+        end
+        -- All registered peds of this wave must be dead
+        if run.waveRegs == 0 or next(run.peds) ~= nil then return end
         run.cleared = wave
         run.wave = wave + 1
-        run.peds = {} -- fresh wave registrations expected next
-    end
+        run.peds = {}
+        run.waveRegs = 0
+    end)
 end)
 
 RegisterNetEvent('fivex_gangwars:endRun', function(token, _reason, _waves, _clientKills)
     local src = source
     local run = Runs[src]
     if not run or run.token ~= token then return end
+
+    -- Settle any pending validations (e.g. final waveClear) before paying
+    local deadline = GetGameTimer() + 4000
+    while run.pending > 0 and GetGameTimer() < deadline do
+        Wait(100)
+    end
+    if not runStillValid(src, run) then return end
 
     local cleared = run.cleared
     local kills = run.kills
@@ -172,5 +250,5 @@ end)
 exports('GetFlashpointEarnings', function(src)
     local license = getLicense(src)
     if not license then return 0 end
-    return tonumber(GetResourceKvpString(Config.PaydayKvpPrefix .. license)) or 0
+    return tonumber(FxDB.get('payday', license)) or 0
 end)

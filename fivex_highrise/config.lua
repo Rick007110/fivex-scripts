@@ -21,6 +21,12 @@ Config.VehicleCooldown = 60000
 Config.NextDelay = 5000
 Config.FallGrace = 8.0
 
+-- Anti-teleport: sign-off is only accepted once (bays x scrub time x MinScrubFactor) has passed
+-- since the lift went up, and never sooner than MinTaskMs. Each bay needs a 3 s scrub hold, so
+-- a factor below 1.0 keeps legit fast players clear of it.
+Config.MinScrubFactor = 0.75
+Config.MinTaskMs = 8000
+
 Config.Blip = {
     sprite = 475,
     color = 3,
@@ -95,7 +101,7 @@ Config.Buildings = {
         windows = {
             vector3(-1367.15, -471.55, 84.50),
             vector3(-1365.55, -471.55, 84.50),
-            vector3(-1368.70, -471.55, 84.50),
+            vector3(-1368.70, -471.55, 84.50), -- was Bay 3 in the wall; now only ~1.5m west of center
             vector3(-1367.15, -470.00, 84.50),
             vector3(-1367.15, -473.10, 84.50),
             vector3(-1365.55, -470.00, 84.50),

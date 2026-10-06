@@ -40,20 +40,10 @@ local function ensureNetworkControl(veh)
     if not Config.RequireNetworkControl then
         return true
     end
-    if NetworkHasControlOfEntity(veh) then
-        return true
-    end
+    -- Owner-only: never request control. Every nearby client sees the burst; only the
+    -- current owner may act, so the chance is rolled (and the impulse applied) exactly once.
     if not NetworkGetEntityIsNetworked(veh) then
         return true
-    end
-    NetworkRequestControlOfEntity(veh)
-    local deadline = GetGameTimer() + (Config.ControlRequestTimeoutMs or 400)
-    while GetGameTimer() < deadline do
-        if NetworkHasControlOfEntity(veh) then
-            return true
-        end
-        NetworkRequestControlOfEntity(veh)
-        Wait(0)
     end
     return NetworkHasControlOfEntity(veh)
 end
@@ -232,6 +222,10 @@ local function tryRollover(veh, wheel)
             dbg('bulletproof tires, skip')
             return
         end
+    end
+
+    if not ensureNetworkControl(veh) then
+        return
     end
 
     local netId = 0

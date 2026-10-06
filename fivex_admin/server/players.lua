@@ -37,7 +37,9 @@ function BuildPlayerEntry(src, includeIdentifiers)
         coords = { x = coords.x, y = coords.y, z = coords.z },
     }
     if includeIdentifiers then
-        entry.identifiers = CollectIdentifiers(src)
+        local ids = CollectIdentifiers(src)
+        ids.ip = nil -- never send IPs to NUI
+        entry.identifiers = ids
     end
     return entry
 end

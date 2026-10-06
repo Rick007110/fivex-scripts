@@ -1,107 +1,110 @@
 # fivex_zombies
 
-**Version:** 1.0.6  
+**Version:** 2.1.0  
 **Author:** FiveX  
 
-Staff-triggered zombie apocalypse for **vanilla CFX** (no QBCore / ESX / ox_lib).
+Staff-triggered zombie outbreak for **vanilla CFX** (no QBCore / ESX / ox_lib). The city fills with
+bloodied dead that wander until they see or hear you, hordes come running from out of sight, and
+five variants each fight differently. A backup of 1.0.6 is in `txData/.../backups/fivex_zombies_backup_2026-10-04`.
 
 ## Install
 
-1. Drop `fivex_zombies` into your resources folder (e.g. `resources/[fivex]/fivex_zombies`).
-2. Ensure the `[fivex]` folder (or this resource) is started — do **not** require a separate `server.cfg` line if `[fivex]` is already ensured.
-3. Grant ACE to staff (default-deny):
+1. Keep `fivex_zombies` in `resources/[fivex]/` (`ensure [fivex]` starts it).
+2. Grant ACE to staff (default-deny):
 
 ```
 add_ace group.admin fivex_zombies allow
 ```
 
-Same parent-grant pattern as `fivex_admin`.
-
 ## Commands
 
 | Command | ACE | Description |
 |---------|-----|-------------|
-| `/zombies start` | `fivex_zombies` | Start apocalypse (server-authoritative) |
-| `/zombies stop` | `fivex_zombies` | Stop and restore normal |
+| `/zombies start` | `fivex_zombies` | Start the outbreak (server-authoritative) |
+| `/zombies stop` | `fivex_zombies` | Stop and restore normal streets |
 | `/apocalypse start\|stop` | `fivex_zombies` | Alias |
 
-Console (src 0) can always run them.
+Console can always run them.
 
-## Behaviour
+## How the dead behave
 
-### On START
+**The whole city turns** (`Config.ConvertAmbient`). Pedestrians keep spawning at the game's normal
+density, and every one within `ConvertRadius` becomes a zombie as it appears, so the dead never run
+out. Each client turns the pedestrians it owns (up to `MaxConverted`). Script peds (mission
+entities: job clerks, shop staff, drivers) and people in vehicles are left alone. Traffic drops to
+almost nothing.
 
-1. Server sets `GlobalState.fivex_zombies_active = true` and fires `fivex_zombies:setActive(true)` to all clients.
-2. Chat announcement to all players (prepare warning) — **kept**.
-3. Client shows **NUI announce** (`action: announce`, `kind: start`) with APOCALYPSE + grace countdown.
-4. Client plays **custom NUI alarm** (`html/audio/alarm.ogg`) via `playAlarm`; optional `PlaySoundFrontend` fallback if enabled.
-5. After `Config.GraceSeconds`, **burst spawn** then ongoing spawn/convert begin; server announces “infection has begun”.
-6. Does **not** call `ClearAreaOfPeds` on start.
+**Topped up.** On top of that, every player's client keeps at least `Config.Wanderers` (55) zombies
+within `Config.WanderRadius`, spawning up to 10 every 0.7 s, `SpawnRadiusMin`–`SpawnRadiusMax`
+away and preferably where the camera can't see them. Zombies shamble about until they notice someone.
 
-### During apocalypse (client)
+**Senses** (`Config.Senses`). A zombie notices a player when it:
 
-Separate threads so conversion/spawn keep running **while the alarm window is active**:
+| Sense | Range |
+|---|---|
+| sees you (in front of it, clear line of sight) | `sight` 32 m (stalkers 55 m) |
+| is right next to you | `touch` 9 m |
+| hears a gunshot | `gunshot` 95 m, suppressed 22 m |
+| hears you sprint | `sprint` 22 m |
+| hears a car (faster than ~30 km/h) / a horn | `vehicle` 35 m / `horn` 70 m |
 
-- **Spawn-only by default** (`Config.ConvertAmbient = false`) — ambient convert is optional (breaks NPC recycling when left on).
-- **Spawn** local mission zombies when **alive nearby** count &lt; `Config.MinNearby` (within `SpawnRadiusMax+10`).
-- Grace end: immediate burst until `MinNearby` / `MaxZombies` (max 20 create attempts).
-- Relationship `FIVEX_ZOMBIE`, clipsets, unarmed melee.
-- Cap: `Config.MaxZombies` across converted + spawned.
-- Spawned tracked separately → **deleted** on stop; ambient converted → **deleted** by default (or restore + `SetPedAsNoLongerNeeded`).
+It hunts that player until it loses them (`loseAfterMs` out of sight, or beyond `loseDistance`).
+A closer, louder player can steal the chase. Turned players are ignored.
 
-### Player infection
+**Hordes** (`Config.Hordes`). Every 22–40 s per player a pack of 12–20 spawns 60–85 m away *behind the
+camera*, already hunting you. The HUD warns "Horde inbound — coming from the north-east".
 
-- Hits from zombie peds via `CEventNetworkEntityDamage` + damage poll.
-- `Config.HitsToInfect` (default **5**).
-- Mode `Config.PlayerInfectMode` (default **`zombie`**).
-- Hit counter decays every `Config.HitDecayMs`.
-- Death clears infection; can be re-infected while apocalypse is on.
+**Variants** (`Config.Variants`). Headshots always kill. Health tunes how many body shots it takes.
 
-### On STOP
+| Variant | Weight | Behaviour |
+|---|---|---|
+| Walker | 55 | Shambles toward you |
+| Runner | 25 | Sprints |
+| Jumper | 9 | Sprints, and leaps at you from 6–30 m: an ~11 m high arc that lands on you (`lift`, cooldown 4.5 s). No fall damage from its own landing |
+| Stalker | 8 | Night only (21:00–05:59). Sees further, creeps up crouched, lunges from 11 m |
+| Alpha | 3 | 900 health + armour, sprints, each hit knocks you down. Max 2 alive |
 
-- Chat “Apocalypse over” **and** NUI `announce` / `kind: stop` (**ALL CLEAR**).
-- `stopAlarm`; delete spawned; cleanup converted; clear infection / FX.
-- Clear zombie↔CIV/PLAYER hostility (do not leave CIV groups hostile).
-- **45s density pulse** (every frame): ped/scenario/vehicle density multipliers at 1.0 + `SetCreateRandomCops(true)` so normal NPCs return.
+Hordes use their own mix (`Config.HordeVariants`: mostly runners).
 
-## Spawn config (1.0.4)
+**Look.** Random civilians from `Config.SpawnModels` (plus `u_m_y_zombie_01`), random outfits and
+1–2 damage packs (`Config.DamagePacks`) for blood and burns.
 
-| Key | Default | Notes |
-|-----|---------|-------|
-| `ConvertAmbient` | `false` | Spawn-only apocalypse; set `true` to convert street civs |
-| `SpawnEnabled` | `true` | Mission ped spawn while active + past grace |
-| `MinNearby` | `12` | Spawn if **alive nearby** &lt; this |
-| `SpawnBatch` | `4` | Per spawn tick |
-| `SpawnIntervalMs` | `1200` | Spawn cadence |
-| `SpawnRadiusMin` | `12` | Ring around player (visible) |
-| `SpawnRadiusMax` | `40` | Ring around player |
-| `MaxZombies` | `40` | Converted + spawned cap |
-| `CleanupOnStop` | `delete` | Converted ambient: `delete` (preferred) or `restore` |
-| `DensityRestoreMs` | `45000` | Post-stop density pulse duration |
-| `SpawnModels` | `u_m_y_zombie_01`, hillbilly, acult | Prefer real zombie model |
+**Streets.** While active, `Config.StreetDensity` applies (full crowd, almost no traffic). AI melee damage is
+multiplied by `Config.ZombieDamageMult`. Both reset on stop, followed by a 45 s density restore pulse.
 
-Spawn uses **local mission peds only**: `CreatePed(4|26, model, …, false, true)` after spawn-point collision/`GetGroundZ` gate + Z-offset retries. No networked client CreatePed (avoids OneSync entity storms / lockdown zeros). Model stays loaded for the whole batch; dead spawned peds are `DeleteEntity`’d on prune. CreatePed failures print a console breadcrumb.
+## Networking
 
-Set `Config.Debug = true` for spawn/convert count prints.
+Zombies are created by the server (`CreatePed`, OneSync) at a point the requesting client chose,
+and tagged with state bags: `fivex_zombie`, `fivex_zvar` (variant) and `fivex_zhunt` (a horde's
+target). Whichever client **owns** a zombie runs its brain, so the AI follows OneSync's ownership
+migration. Players publish their noise in `Player(id).state.fivex_znoise`, so a zombie owned by
+another client still hears your gunshot.
 
-## NUI
+Server limits for spawned zombies: `MaxZombies` (300, server-wide), `MaxZombiesPerPlayer` (60), max 2 alphas, a
+model allowlist (`SpawnModels`), a per-player spawn rate limit, and spawn distance checks. Zombies
+farther than `DespawnDistance` (190 m) from every player are removed to free the caps.
 
-- `ui_page 'html/index.html'`, files include `html/**` and `html/audio/alarm.ogg`.
-- No cursor / no focus (`SetNuiFocus(false,false)` always).
-- Messages:
-  - `{ action='announce', kind='start'|'stop', grace?, durationMs? }`
-  - `{ action='playAlarm', src='audio/alarm.ogg', volume? }`
-  - `{ action='stopAlarm' }`
+## Player infection
 
-## Security
+- Hits from zombies count up to `Config.HitsToInfect` (5). The counter decays after `HitDecayMs`.
+- At the threshold: `PlayerInfectMode` `zombie` (you turn: melee only, screen effect, zombies
+  ignore you), `kill`, or `zombie_or_kill`.
+- Death clears the infection.
 
-- Only ACE holders (or console) can start/stop.
-- Clients **cannot** force start; they only react to server events / `GlobalState`.
+## Screen
 
-## Alarm
+- **Start:** an Emergency Alert takeover: glitching OUTBREAK title, the grace countdown ring, a
+  ticker, and the alarm (`html/audio/alarm.ogg`).
+- **During:** an HUD top-right: elapsed time, threat level (Calm → Overrun), zombies nearby /
+  hunting you, your kills, the infection meter, and "Night: stalkers are out". Hidden while the
+  pause menu is open. It goes green when you've turned.
+- **Horde warning:** a toast next to the HUD with the direction and pack size.
+- **Stop:** ALL CLEAR with how many you killed and how long you survived.
 
-Primary: royalty-free generated siren at `html/audio/alarm.ogg` (NUI `<Audio>` loop).  
-Fallback: `PlaySoundFrontend` when `Config.UseFrontendAlarmFallback = true` or NUI disabled.
+No cursor, never takes focus. Text is in `locales/en.lua`.
+
+NUI messages: `announce` (`kind` start|stop, `grace`, `kills`, `survived`), `hud`, `horde`,
+`playAlarm`, `stopAlarm`.
 
 ## Exports (server)
 
@@ -110,3 +113,31 @@ exports['fivex_zombies']:IsApocalypseActive()
 exports['fivex_zombies']:StartApocalypse()
 exports['fivex_zombies']:StopApocalypse()
 ```
+
+## Performance
+
+Expect 100+ zombies around a player. If FPS drops, lower in this order: `Wanderers`,
+`MaxConverted`, `Hordes.size`, `StreetDensity.peds`.
+
+## Changelog
+
+### 2.1.0
+- The whole city turns: ambient pedestrians are converted as they spawn (constant supply), at full pedestrian density.
+- Many more zombies: 55+ kept around each player, faster top-up, bigger and more frequent hordes.
+- Jumpers leap far higher (~11 m apex, aimed to land on you) and take no fall damage from it.
+- On stop, every zombie a client owns is removed, including ones that migrated from other players.
+
+### 2.0.0
+- Zombies wander and notice players by sight, proximity and noise (gunshots, sprinting, cars, horns), then hunt; lose interest when they lose you.
+- Hordes spawn out of view and come running, with an HUD warning.
+- Variants: walker, runner, jumper (leaps), stalker (night, creeps), alpha (tank, knockdown).
+- Bloodied random civilians instead of one model. Headshots kill.
+- AI runs on whichever client owns the zombie (survives ownership migration).
+- Streets empty out while active. Far-away zombies are recycled server-side.
+- New UI: Emergency Alert takeover, live outbreak HUD, horde toast, end-of-outbreak summary.
+
+### 1.0.6
+- `ensureNetworkControl` before setup on server peds; server model allowlist and spawn rate limit.
+
+### 1.0.5
+- Server-side `CreatePed`; corpses linger `CorpseDespawnMs`.

@@ -124,6 +124,7 @@ Locales['en'] = {
     cannot_save = 'Could not save appearance.',
     rate_limited = 'Slow down — that action is rate limited.',
     creator_denied = 'You do not have permission to reopen the creator.',
+    in_vehicle = 'Leave your vehicle first.',
     model_timeout = 'Could not load the freemode model.',
     invalid_appearance = 'Appearance was rejected (invalid data).',
     first_join_hint = 'Create your character. You must save before you can leave.',

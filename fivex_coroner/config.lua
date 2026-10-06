@@ -23,6 +23,12 @@ Config.DutyRadius = 4.0
 Config.VehicleCooldown = 60000
 Config.NextDelay = 5000
 
+-- Anti-teleport: a delivery is only accepted once enough time has passed since the call was
+-- issued to cover call -> bay at MaxTravelSpeed (m/s, deliberately generous), and never
+-- sooner than MinTaskMs. Legit play (bag 4 s + load 2.5 s + unload 3 s + driving) never hits it.
+Config.MaxTravelSpeed = 60.0
+Config.MinTaskMs = 8000
+
 Config.Blip = {
     sprite = 310,
     color = 40,

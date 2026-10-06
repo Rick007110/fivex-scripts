@@ -1,152 +1,61 @@
-# fivex_flexa — Flexa (Whiz Mobile)
+# fivex_flexa — Flexa, the foldable
 
-Standalone **foldable phone** for FiveM (vanilla CFX). No QBCore, ESX, or ox_lib.  
-NUI-only by default (no phone prop). Real player **SMS** + **call signaling**; optional **pma-voice**.  
-**Whiz UI** is One UI–inspired (foldable dual-pane, dock hinge) — **no Samsung / Galaxy branding** in user-facing strings.
+Version **4.1.0**. Flexa **is sd-phone**. Unfolded, the same phone opens sideways to a
+double-width screen (880 instead of 440, same height, anchored bottom-right), using sd-phone's own
+foldable body: two home pages side by side, list and detail at once, split view. It is one device,
+so everything carries over when you fold or unfold: the open app, lock state, calls, settings, data.
+sd-phone remembers which way it was left and comes back out that way.
 
-Version: **1.2.1**
-
-## Install
-
-1. Place `fivex_flexa` in your `resources` folder.
-2. For **real Camera photos**, also ensure [screenshot-basic](https://github.com/citizenfx/screenshot-basic) **before** Flexa:
-   `ensure screenshot-basic` then `ensure fivex_flexa` (after `pma-voice` if you use it).
-3. Without screenshot-basic, Camera still works with a stamped placeholder image (F8 warns once).
-4. Restart or `ensure fivex_flexa`.
-
-## Keybinds / commands
+## Controls
 
 | Action | Default | Notes |
-|--------|---------|--------|
-| Open / close | `/flexa` or **F1** | Rebind in FiveM Settings → Key Bindings → FiveM |
-| Fold / unfold | `/flexa_fold` or **G** | While open; also the hinge button in the UI |
+|---|---|---|
+| Open / close | **F1** or `/flexa` | |
+| Fold / unfold | **G** or `/flexa_fold` | While open. Also the Unfold / Fold button on the phone's right side |
 
-ESC closes the phone.
+Rebind both in Settings → Key Bindings → FiveM. sd-phone's own keybind is off.
 
-## Phone numbers
+## What it needs (server.cfg order)
 
-- Assigned on first identity request: `555-XXXX` (prefix from `Config.PhoneNumberPrefix`).
-- Bound to player identifier preference: `license:` → `fivem:` → `steam:`.
-- Persisted in resource KVP (`flexa:num:…` / `flexa:id:…`).
-- Export: `exports['fivex_flexa']:GetPlayerNumber(src)`.
-
-## SMS
-
-- Threads keyed by sorted number pair; history capped ~100 messages.
-- Rate limit: `Config.SmsRateLimitMs` (default 800).
-- Max body: `Config.MaxMessageLength` (default 500).
-- Server never trusts client `from`.
-
-## Calls
-
-- Signaling: start / accept / reject / end; ringing timeout `Config.CallTimeoutMs` (30s).
-- Offline or busy peer → call fails (UI goes to ended).
-- Voice: `Config.VoiceBridge = 'auto'|'pma-voice'|'none'`.  
-  If `pma-voice` is started, both clients join a call channel (best-effort `pcall`). UI works without voice.
-
-## App Store
-
-Home grid shows **installed apps only**. Core apps cannot be removed.
-
-| Config | Role |
-|--------|------|
-| `Config.CoreApps` | Always installed (`phone`, `messages`, `settings`, `store`) |
-| `Config.AppCatalog` | Full catalog (id, label, icon, color, blurb, category, core?) |
-| `Config.DefaultInstalled` | First-run extras (notes, calculator, …) + core forced in |
-| `Config.Apps` | Derived home list for backward compat; client overrides from KVP |
-
-**Persistence (v1):** client resource KVP `fivex_flexa:installed` = JSON array of app ids.  
-**Later:** optional server sync per license — not required for v1.
-
-### NUI store contract
-
-| Direction | Name | Payload |
-|-----------|------|---------|
-| NUI → Lua | `storeGetCatalog` | `{}` |
-| NUI → Lua | `storeInstall` | `{ id }` |
-| NUI → Lua | `storeUninstall` | `{ id }` (rejected if core) |
-| Lua → NUI | `setStoreCatalog` | `{ catalog: [{ id, label, icon, color, blurb, category, core, installed }] }` |
-| Lua → NUI | `setApps` | installed-only `{ apps: [{ id, label, icon, color }] }` |
-
-### Adding a catalog entry
-
-1. Append to `Config.AppCatalog`:
-   ```lua
-   { id = 'maps', label = 'Maps', icon = 'maps', color = '#ff9f0a',
-     blurb = 'City navigation stub.', category = 'Tools' }
-   ```
-2. Optionally add the id to `Config.DefaultInstalled` if it should ship pre-installed.
-3. Implement UI in `html/app.js` `renderAppBody` (or leave the “Coming soon” stub until UIXpert ships a screen).
-4. Restart the resource. Players install it from **Store**.
-
-Labels must stay Flexa / Whiz Mobile — never Samsung, Galaxy, or One UI product names in UI copy.
-
-## Config highlights
-
-```lua
-Config.UsePhoneAnim = false   -- NUI-only; no ped anim / no prop
-Config.PhoneNumberPrefix = '555'
-Config.MaxMessageLength = 500
-Config.SmsRateLimitMs = 800
-Config.CallTimeoutMs = 30000
-Config.VoiceBridge = 'auto'   -- auto|pma-voice|none
-Config.NowBarMax = 5
-Config.CoreApps = { 'phone', 'messages', 'settings', 'store' }
-Config.DefaultInstalled = { 'phone', 'messages', 'settings', 'store', 'notes', 'calculator' }
--- Config.SettingsDefaults — wallpaper, foldAnimMs, sound, Now Bar, brightness, …
+```cfg
+set mysql_connection_string "mysql://USER:PASSWORD@localhost/play112_theory?charset=utf8mb4"
+setr ox:locale "en"
+ensure ox_lib
+ensure oxmysql
+ensure ND_Core        # FiveX compatibility core, NOT the real ND_Core (see resources/ND_Core)
+ensure sd-phone-props # includes the foldable phone props (shut and open)
+ensure sd-phone
+ensure [fivex]        # includes fivex_flexa
 ```
 
-## NUI contract
+`ND_Core` here is a small FiveX resource that gives sd-phone the framework it insists on: one
+character per player (by license, named after the player), bank balance from **fivex_bank**,
+cash in the database. sd-phone creates all of its own tables on first boot.
 
-See `html/HANDOFF.md` (UIXpert). Client Lua maps server events to those actions exactly, e.g.:
+## Changes made to sd-phone
 
-- `callStart` `{ number }`
-- `callState` / `incomingCall`
-- `smsGetThread` `{ threadId }` (peer number)
-- `smsSend` `{ threadId?, number?, text }`
-- `setThreads` / `setMessages` / `smsIncoming`
-- Store callbacks above (`storeGetCatalog` / `storeInstall` / `storeUninstall`)
+All marked `[FiveX/Flexa]`. An untouched copy is in `txData/.../backups/`.
 
-## Two-player test
+| File | Change |
+|---|---|
+| `configs/phone.lua` | `RequireItem = false` (no phone item needed), `Keybind = ''` |
+| `server/main.lua` | honours `RequireItem = false` |
+| `client/main.lua` | `exports['sd-phone']:open({ unlocked = true })` (used by `OpenApp`) |
+| `bridge/shared/ndcore.lua`, `oxcore.lua` | server detection made truthy (`IsDuplicityVersion() and true`): on this FXServer build the strict `== true` check failed, so sd-phone could never resolve a player |
+| `server/apps/init.lua` | logs the reason when an app install is refused |
 
-1. Start resource on a server with two clients.
-2. Both open Flexa (`/flexa`). Note each number (Settings / dialer context — numbers are assigned server-side; use `exports` or ask the other player).
-3. **SMS:** Messages → New → enter `555-XXXX` → send. Peer should see live `smsIncoming`; reopen inbox to confirm persistence.
-4. **Call:** Phone dialer → enter peer number → Call. Peer gets incoming UI → Accept / Reject. With `pma-voice`, voice channel joins on accept.
-5. **Store:** Open Store → Get Weather (or another non-core app) → confirm it appears on home; Remove → confirm it leaves. Core apps show as Core (not removable).
-6. **Camera:** open Camera → shutter → photo appears in Gallery. With screenshot-basic, capture is the game view.
-7. **Clock:** status/widget match; Settings → Time format switches 12h/24h.
-8. Confirm no prop spawns (`UsePhoneAnim = false`).
+## Exports (client)
 
-## Whiz UI 1.2.1 (Now Bar, Camera, clocks)
+| Export | Does |
+|---|---|
+| `IsOpen()` / `ClosePhone()` / `Open()` | |
+| `IsFolded()` / `SetFolded(bool)` | `SetFolded` only acts while the phone is open |
+| `RegisterApp(def)` | v2 App API, kept: the app becomes an sd-phone custom app |
+| `UnregisterApp(id)` / `SendAppMessage(id, data)` / `Notify(id, { title, body })` / `OpenApp(id)` | |
 
-Home widgets are Clock + Weather only. Camera writes into Gallery. Clocks default to 24h.
-
-| Feature | Status |
-|---------|--------|
-| **Now Bar** | Client pushes `{ action: 'nowBar', items }` (max `Config.NowBarMax`). SMS / incoming call / store install feed items. NUI callbacks `nowBarOpen` / `nowBarDismiss`. |
-| **Settings persistence** | Full `Config.SettingsDefaults` object via KVP; `setSetting` accepts wallpaper, foldAnimMs, sound, vibration, darkMode, nowBarEnabled, airplane/wifi/bt/location fakes, brightness, textSize. Pushed as `setSettings` on open/ready. |
-| **Camera + Gallery** | Shutter → `cameraCapture` → screenshot-basic (or placeholder) → server `gallery/` files + KVP index. Gallery `setGallery` / `galleryDelete`. Cap `Config.MaxGalleryPhotos` (30). |
-| **Clock format** | Default `clockFormat = '24h'`. Settings → Display → Time format toggles `24h` / `12h` (status, widgets, Clock app, message times). |
-
-Wallpaper presets: `default` | `dark` | `aurora` | `sunset` | `ocean`. Text size: `small` | `default` | `large`.
-
-```lua
-Config.NowBarMax = 5
-Config.SettingsDefaults = { wallpaper = 'aurora', foldAnimMs = 560, ... }
-```
-
-## Structure
-
-
-```
-fivex_flexa/
-  fxmanifest.lua
-  config.lua
-  locales/en.lua
-  client/main.lua
-  server/main.lua
-  html/          # UIXpert NUI + HANDOFF.md
-  gallery/       # saved photos (runtime)
-  README.md
-```
+Pages built on `html/sdk/flexa-app.js` keep working inside sd-phone: `FlexaApp.post`, `on('init' |
+'message' | 'theme' | 'visibility')` and `toast` are translated to sd's app shell. `back()` / `home()`
+do nothing there (sd has its own gestures). Inside sd the SDK pads the page so it clears the status
+bar and home indicator, and on the unfolded screen centres it in a 720px column (the old unfolded
+width). `OpenApp` opens the phone unlocked, straight into the app; an app disappears when its
+resource stops.

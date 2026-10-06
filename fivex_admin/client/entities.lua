@@ -41,11 +41,13 @@ local function deleteLast(list, label)
     for i = #list, 1, -1 do
         local ent = list[i]
         list[i] = nil
-        if ent and DoesEntityExist(ent) then
+        if ent and DoesEntityExist(ent) and TakeEntityControl(ent) then
             SetEntityAsMissionEntity(ent, true, true)
             DeleteEntity(ent)
-            Notify(L('entity_deleted_last', label), 'success')
-            return true
+            if not DoesEntityExist(ent) then
+                Notify(L('entity_deleted_last', label), 'success')
+                return true
+            end
         end
     end
     Notify(L('entity_none_tracked', label), 'error')
@@ -161,10 +163,13 @@ RegisterNetEvent('fivex_admin:deleteEntities', function(kind, mode, radius)
                 for k = 1, #spawnedProps do
                     if spawnedProps[k] == obj then ours = true break end
                 end
-                if ours or (allowed[model] and (IsEntityAMissionEntity(obj) or NetworkGetEntityIsNetworked(obj))) then
+                if (ours or (allowed[model] and (IsEntityAMissionEntity(obj) or NetworkGetEntityIsNetworked(obj))))
+                    and TakeEntityControl(obj) then
                     SetEntityAsMissionEntity(obj, true, true)
                     DeleteObject(obj)
-                    n = n + 1
+                    if not DoesEntityExist(obj) then
+                        n = n + 1
+                    end
                 end
             end
         end
@@ -195,10 +200,12 @@ RegisterNetEvent('fivex_admin:deleteEntities', function(kind, mode, radius)
                 for k = 1, #spawnedPeds do
                     if spawnedPeds[k] == ped then ours = true break end
                 end
-                if ours or allowed[model] then
+                if (ours or allowed[model]) and TakeEntityControl(ped) then
                     SetEntityAsMissionEntity(ped, true, true)
                     DeletePed(ped)
-                    n = n + 1
+                    if not DoesEntityExist(ped) then
+                        n = n + 1
+                    end
                 end
             end
         end

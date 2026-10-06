@@ -47,3 +47,12 @@ Config.PayClamp = { min = 1, max = 5000 }
 
 Config.KvpJob = 'fivex_job_v1:'
 Config.KvpPay = 'fivex_job_pay_v1:'
+
+-- Resources allowed to call AddCash / RemoveCash (wallet = cash)
+Config.TrustedResources = {
+    fivex_bank = true,
+    fivex_dealership = true,
+    fivex_knoway = true,
+    fivex_police = true,
+}
+Config.CashClamp = 10000000

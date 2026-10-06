@@ -3,30 +3,20 @@ game 'gta5'
 lua54 'yes'
 
 name 'fivex_flexa'
-version '1.2.1'
-repository 'Rick007110/fivex-scripts'
-description 'Flexa — foldable phone by Whiz Mobile (standalone)'
+version '4.1.0'
+description 'Flexa — the foldable: sd-phone that unfolds to a double-width screen'
 author 'FiveX'
 
-ui_page 'html/index.html'
-
+-- the App SDK stays served for pages built against Flexa (e.g. fivex_knoway)
 files {
-    'html/**',
-    'gallery/**',
+    'html/sdk/flexa-app.js',
 }
 
-shared_scripts {
-    'config.lua',
-    'locales/en.lua',
-}
+shared_script 'config.lua'
+client_script 'client/main.lua'
 
-client_scripts {
-    'client/main.lua',
-}
+dependency 'sd-phone'
 
-server_scripts {
-    'server/versioncheck.lua',
-    'server/main.lua',
-}
-
+repository 'Rick007110/fivex-scripts'
 dependency 'fivex_versioncheck'
+server_script 'server/versioncheck.lua'

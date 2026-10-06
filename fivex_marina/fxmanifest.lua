@@ -4,12 +4,21 @@ lua54 'yes'
 
 name 'fivex_marina'
 author 'FiveX'
-version '1.0.1'
+version '2.0.0'
 repository 'Rick007110/fivex-scripts'
-description 'Standalone marina handler — dock boats, fuel, detail'
+description 'Harbor Authority — career marina job: contracts, ranks, sea rescues, charters and a dispatch tablet'
 
 dependency 'fivex_jobcenter'
+dependency 'oxmysql'
 dependency 'fivex_versioncheck'
+
+ui_page 'html/index.html'
+
+files {
+    'html/index.html',
+    'html/style.css',
+    'html/app.js',
+}
 
 shared_scripts {
     'config.lua',
@@ -17,10 +26,13 @@ shared_scripts {
 }
 
 client_scripts {
+    'client/util.lua',
     'client/main.lua',
 }
 
 server_scripts {
+    '@oxmysql/lib/MySQL.lua',
     'server/versioncheck.lua',
+    'server/db.lua',
     'server/main.lua',
 }

@@ -10,7 +10,7 @@ Standalone opt-in turf wave minigame for FiveM. **No ox_lib, no QB/ESX.**
 4. At **100% heat**, a **wave** starts: NPC gang members (custom relationship group, hostile to PLAYER) spawn and attack with fists or pistols.
 5. Clear all hostiles → brief calm → next wave (harder: more peds up to **6**, higher pistol chance).
 6. **Leave the turf** or **die** → run ends. Score = waves cleared + kills.
-7. **Payday**: server stub notify + optional KVP total by license (no framework bank yet). Client never awards money.
+7. **Payday**: server stub notify + optional total by license in MySQL (`fivex_gangwars_payday`, needs oxmysql) (no framework bank yet). Client never awards money.
 
 ## Commands
 

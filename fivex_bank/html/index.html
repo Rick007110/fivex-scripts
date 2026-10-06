@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FiveX Bank</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" class="hidden" role="dialog" aria-label="FiveX Bank">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <div class="brand-name">FiveX Bank</div>
+          <div class="brand-sub" id="location">Teller</div>
+        </div>
+      </div>
+      <button type="button" class="icon-btn" id="btn-close" title="Close">Esc</button>
+    </header>
+
+    <section class="summary">
+      <div class="card">
+        <div class="kicker">Bank balance</div>
+        <div class="amount" id="bal">$0</div>
+      </div>
+      <div class="card">
+        <div class="kicker">Cash</div>
+        <div class="amount small" id="cash">$0</div>
+      </div>
+      <div class="acct-line muted">
+        <span>Account <span class="acct-no" id="acct">—</span></span>
+        <span id="holder"></span>
+      </div>
+    </section>
+
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="cash" aria-selected="true">Cash</button>
+      <button type="button" class="tab" role="tab" data-tab="transfer" aria-selected="false">Transfer</button>
+      <button type="button" class="tab" role="tab" data-tab="history" aria-selected="false">History</button>
+    </nav>
+
+    <section class="panel" data-panel="cash">
+      <div class="field">
+        <label for="cash-amount">Amount</label>
+        <input id="cash-amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" />
+      </div>
+      <div class="chips" id="cash-chips"></div>
+      <div class="limit" id="cash-limit"></div>
+      <div class="row2">
+        <button type="button" class="btn" id="btn-deposit">Deposit cash</button>
+        <button type="button" class="btn primary" id="btn-withdraw">Withdraw</button>
+      </div>
+    </section>
+
+    <section class="panel hidden" data-panel="transfer">
+      <div class="field">
+        <label for="tr-account">Recipient account</label>
+        <input id="tr-account" type="text" maxlength="10" placeholder="FX000000" autocomplete="off" />
+      </div>
+      <div class="field">
+        <label for="tr-amount">Amount</label>
+        <input id="tr-amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" />
+      </div>
+      <div class="field">
+        <label for="tr-note">Note (optional)</label>
+        <input id="tr-note" type="text" maxlength="40" autocomplete="off" />
+      </div>
+      <div class="limit" id="tr-limit"></div>
+      <button type="button" class="btn primary block" id="btn-transfer">Send transfer</button>
+    </section>
+
+    <section class="panel hidden" data-panel="history">
+      <div class="history" id="history"></div>
+    </section>
+
+    <footer class="foot">
+      <span class="muted hint">E at a teller or ATM · /bank · Esc closes</span>
+    </footer>
+  </div>
+
+  <div id="modal" class="overlay hidden" role="dialog" aria-modal="true">
+    <form class="modal" id="modal-form">
+      <h2>Send transfer?</h2>
+      <p class="muted" id="modal-body"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn ghost" id="modal-cancel">Cancel</button>
+        <button type="submit" class="btn primary">Send</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,18 +1,43 @@
+-- Authoritative world clock + weather. The server clock keeps running (unless frozen) and is re-sent
+-- to everyone every Config.WorldSync.SyncInterval, so all players share one time and weather and
+-- nothing else (vMenu, scripts, the game's own weather cycle) can drift it.
+
+local sync = Config.WorldSync or {}
+local MINUTE_MS = math.max(100, math.floor(tonumber(sync.MinuteMs) or 2000))
+
 World = World or {
-    hour = 12,
+    hour = math.floor(tonumber(sync.StartHour) or 12),
     minute = 0,
-    freeze = false,
-    weather = 'CLEAR',
+    freeze = sync.StartFrozen == true,
+    weather = string.upper(tostring(sync.StartWeather or 'CLEAR')),
     blackout = false,
 }
 
+-- clock = baseMinutes at baseAt, advancing one in-game minute per MINUTE_MS
+local baseMinutes = World.hour * 60 + World.minute
+local baseAt = GetGameTimer()
+
+local function advance()
+    if World.freeze then return end
+    local total = (baseMinutes + math.floor((GetGameTimer() - baseAt) / MINUTE_MS)) % 1440
+    World.hour = math.floor(total / 60)
+    World.minute = total % 60
+end
+
+local function rebase()
+    baseMinutes = World.hour * 60 + World.minute
+    baseAt = GetGameTimer()
+end
+
 function World.Snapshot()
+    advance()
     return {
         hour = World.hour,
         minute = World.minute,
         freeze = World.freeze,
         weather = World.weather,
         blackout = World.blackout,
+        msPerMinute = MINUTE_MS,
     }
 end
 
@@ -21,6 +46,7 @@ function World.Broadcast()
 end
 
 function World.SetTime(hour, minute, freeze)
+    advance()
     hour = math.floor(tonumber(hour) or 12)
     minute = math.floor(tonumber(minute) or 0)
     if hour < 0 then hour = 0 end
@@ -32,6 +58,7 @@ function World.SetTime(hour, minute, freeze)
     if freeze ~= nil then
         World.freeze = freeze and true or false
     end
+    rebase()
     World.Broadcast()
 end
 
@@ -56,6 +83,18 @@ function World.SetBlackout(on)
 end
 
 AddEventHandler('playerJoining', function()
+    if sync.Enabled == false then return end
     local src = source
-    TriggerClientEvent('fivex_admin:worldSync', src, World.Snapshot())
+    SetTimeout(2000, function()
+        if GetPlayerName(src) then
+            TriggerClientEvent('fivex_admin:worldSync', src, World.Snapshot())
+        end
+    end)
+end)
+
+CreateThread(function()
+    while true do
+        Wait(math.max(2000, tonumber(sync.SyncInterval) or 10000))
+        if sync.Enabled ~= false then World.Broadcast() end
+    end
 end)

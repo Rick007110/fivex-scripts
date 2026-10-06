@@ -75,21 +75,23 @@ Edit `config.lua`:
 
 ## Bans
 
-Stored with server resource KVP (`GetResourceKvpString` / `SetResourceKvp`). They survive resource restarts. `playerConnecting` drops matching `license` (required) plus `discord` / `fivem` / `steam` when present.
+Stored in MySQL (`fivex_admin_bans`, one row per ban). They survive resource restarts. `playerConnecting` drops matching `license` (required) plus `discord` / `fivem` / `steam` when present.
 
 Offline ban (Bans tab) accepts `license:HASH` or a raw hash, optional name/discord, and the same duration presets as live bans. If that license is online they are dropped as well.
 
 Lookup accepts license, discord, or steam and returns matching bans plus notes/warns/mute state for the resolved license.
 
-## Records (server KVP)
+## Records (MySQL via oxmysql)
 
-| Key | Contents |
+Requires **oxmysql** (`ensure oxmysql` before this resource). Tables are created on first start, and existing KVP data is imported once (the KVP entries are left untouched).
+
+| Table | Key → value |
 | --- | --- |
-| `fivex_admin_bans_v1` | Ban list |
-| `fivex_admin_notes_v1` | Map license → notes (max 40, 240 chars, newest first) |
-| `fivex_admin_warns_v1` | Map license → warns (max 50) |
-| `fivex_admin_mutes_v1` | Map license → voice mute |
-| `fivex_admin_audit_v1` | Audit array (newest first, cap 250) |
+| `fivex_admin_bans` | ban `id` → `ban` JSON |
+| `fivex_admin_notes` | `license` → `notes` (max 40, 240 chars, newest first) |
+| `fivex_admin_warns` | `license` → `warns` (max 50) |
+| `fivex_admin_mutes` | `license` → voice `mute` |
+| `fivex_admin_audit` | entry `id` → `entry` (newest 250 kept) |
 
 Notes/warns/mutes require a `license` identifier. Kick still works without one.
 
