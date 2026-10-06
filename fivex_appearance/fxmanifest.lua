@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'fivex_appearance'
 author 'FiveX'
-version '1.0.3'
+version '1.0.4'
 repository 'Rick007110/fivex-scripts'
 description 'Standalone character creator and clothing / barber / tattoo shops'
 

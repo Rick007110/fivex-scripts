@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'fivex_gangwars'
 author 'FiveX'
-version '1.0.0'
+version '1.0.1'
 repository 'Rick007110/fivex-scripts'
 description 'Flashpoint — opt-in turf wave minigame (standalone, no framework)'
 

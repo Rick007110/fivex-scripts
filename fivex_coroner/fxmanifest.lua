@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'fivex_coroner'
 author 'FiveX'
-version '1.0.2'
+version '1.0.3'
 repository 'Rick007110/fivex-scripts'
 description 'Standalone coroner job — recover remains, load the rumpo, deliver to the morgue'
 

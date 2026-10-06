@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'fivex_admin'
 author 'FiveX'
-version '1.1.0'
+version '1.1.1'
 repository 'Rick007110/fivex-scripts'
 description 'Standalone ACE-gated staff/admin menu with a professional NUI'
 
