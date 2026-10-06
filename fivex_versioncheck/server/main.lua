@@ -64,6 +64,56 @@ local function githubApi(path, cb)
     })
 end
 
+-- Every release of a repo (all pages), fetched once and shared by all registered resources:
+-- ~20 resources asking separately would burn GitHub's 60 unauthenticated requests / hour.
+local CACHE_MS = 10 * 60 * 1000
+local PER_PAGE = 100
+local MAX_PAGES = 30
+local cache = {} -- [owner/name] = { at, releases } | { loading = true, waiting = { cb, ... } }
+
+local function allReleases(owner, name, cb)
+    local key = owner .. '/' .. name
+    local c = cache[key]
+    if c and c.releases and GetGameTimer() - c.at < CACHE_MS then
+        cb(c.releases, 200)
+        return
+    end
+    if c and c.loading then
+        c.waiting[#c.waiting + 1] = cb
+        return
+    end
+
+    c = { loading = true, waiting = { cb } }
+    cache[key] = c
+    local all = {}
+
+    local function finish(list, status)
+        if list then
+            cache[key] = { at = GetGameTimer(), releases = list }
+        else
+            cache[key] = nil -- don't cache failures
+        end
+        for _, w in ipairs(c.waiting) do w(list, status) end
+    end
+
+    local function page(n)
+        githubApi(('/repos/%s/%s/releases?per_page=%d&page=%d'):format(owner, name, PER_PAGE, n), function(data, status)
+            if type(data) ~= 'table' then
+                if n > 1 then print(('%s: GitHub HTTP %s on page %d — using the first %d releases'):format(key, tostring(status), n, #all)) end
+                finish(n > 1 and all or nil, status)
+                return
+            end
+            for i = 1, #data do all[#all + 1] = data[i] end
+            if #data < PER_PAGE or n >= MAX_PAGES then
+                finish(all, status)
+            else
+                page(n + 1)
+            end
+        end)
+    end
+    page(1)
+end
+
 local function makeObj(resource, repo, localVersion)
     local interval = DEFAULT_INTERVAL_MS
     local running = true
@@ -79,7 +129,7 @@ local function makeObj(resource, repo, localVersion)
         local owner, name = repo:match('^([^/]+)/([^/]+)$')
         if not owner then return end
 
-        githubApi(('/repos/%s/%s/releases?per_page=40'):format(owner, name), function(releases, status)
+        allReleases(owner, name, function(releases, status)
             local localSv = parseSemver(localVersion)
             local best, bestTag, bestUrl = nil, nil, nil
 
