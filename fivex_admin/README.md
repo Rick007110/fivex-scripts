@@ -71,6 +71,12 @@ Edit `config.lua`:
 - Ban duration presets
 - `FreezeOnOpen` (default `false`)
 - Max announce length
+- `Screenshots` — `quality`, `keepPerPlayer` (25). Player screenshots (needs `screenshot-basic`) are stored in MySQL,
+  table `fivex_admin_screenshots` (created on start), and opened from the player's **Screenshots** tab. Older ones
+  beyond `keepPerPlayer` are deleted automatically.
+- `AnnounceViaTxAdmin` (default `true`): Staff → Announcement shows txAdmin's announcement popup and is written to
+  txAdmin's server log. It follows txAdmin's `txAdmin-hideAdminInMessages` (server name as author) and falls back to the
+  FiveX Admin popup when txAdmin isn't running or `txAdmin-hideDefaultAnnouncement` is set.
 - Built-in teleport locations
 
 ## Bans

@@ -393,10 +393,7 @@ RegisterNetEvent('fivex_admin:playerRecord', function(target)
         notify(src, L('invalid_target'), 'error')
         return
     end
-    local rec = BuildPlayerRecord(tid)
-    if rec then
-        TriggerClientEvent('fivex_admin:playerRecord', src, rec)
-    end
+    SendPlayerRecord(src, BuildPlayerRecord(tid))
 end)
 
 local function requireTarget(src, payload)
@@ -703,7 +700,7 @@ register('ply.warn', function(src, payload)
     Audit.Log(src, 'warn', { target = tid, targetName = GetPlayerName(tid), license = license, detail = reason })
     notify(src, 'Warned ' .. (GetPlayerName(tid) or '?'), 'success')
     local rec = BuildPlayerRecord(tid)
-    if rec then TriggerClientEvent('fivex_admin:playerRecord', src, rec) end
+    if rec then SendPlayerRecord(src, rec) end
 end)
 
 register('ply.ban', function(src, payload)
@@ -837,7 +834,17 @@ register('staff.announce', function(src, payload)
         notify(src, L('invalid_reason'), 'error')
         return
     end
-    TriggerClientEvent('fivex_admin:announce', -1, GetPlayerName(src) or 'Staff', msg)
+    local author = GetPlayerName(src) or 'Staff'
+    if Config.AnnounceViaTxAdmin and GetResourceState('monitor') == 'started'
+        and not GetConvarBool('txAdmin-hideDefaultAnnouncement') then
+        -- the same two steps txAdmin takes for its own announcements: its popup on every client
+        -- and a line in its server log (txAdmin only accepts its command bridge from its own resource)
+        if GetConvarBool('txAdmin-hideAdminInMessages') then author = GetConvar('txAdmin-serverName', 'txAdmin') end
+        TriggerClientEvent('txcl:showAnnouncement', -1, msg, author)
+        TriggerEvent('txsv:logger:addChatMessage', 'tx', '(Broadcast) ' .. author, msg)
+    else
+        TriggerClientEvent('fivex_admin:announce', -1, author, msg)
+    end
     webhook(L('webhook_announce'), ('**%s** (%s)\n%s'):format(GetPlayerName(src), src, msg), 3447003)
     notify(src, L('announced'), 'success')
 end)
@@ -885,10 +892,7 @@ end)
 
 
 local function pushRecord(src, tid)
-    local rec = BuildPlayerRecord(tid)
-    if rec then
-        TriggerClientEvent('fivex_admin:playerRecord', src, rec)
-    end
+    SendPlayerRecord(src, BuildPlayerRecord(tid))
 end
 
 register('ply.note', function(src, payload)
@@ -967,19 +971,30 @@ register('ply.screenshot', function(src, payload)
     end
     local tname = GetPlayerName(tid) or '?'
     local license = RecordsLicenseOf(tid)
-    -- Saved server-side by screenshot-basic (mv into an existing directory).
-    local fileName = ('%s/screenshots/%d_%d_%d.jpg'):format(GetResourcePath(RESOURCE), os.time(), tid, math.random(1000, 9999))
+    if not license then
+        notify(src, L('persist_no_license'), 'error')
+        return
+    end
+    -- screenshot-basic only captures (as a data: URI); the image is stored in MySQL
     local ok = pcall(function()
-        exports['screenshot-basic']:requestClientScreenshot(tid, { fileName = fileName, encoding = 'jpg', quality = 0.6 }, function(err, data)
-            if err then
+        exports['screenshot-basic']:requestClientScreenshot(tid, { encoding = 'jpg', quality = Config.Screenshots.quality }, function(err, data)
+            if err or type(data) ~= 'string' or not data:find('^data:image/') then
+                print(('^3[fivex_admin] screenshot of %s [%d] failed: %s^7'):format(tname, tid, tostring(err or 'no image data')))
                 if PlayerOnline(src) then notify(src, L('screenshot_fail'), 'error') end
                 return
             end
-            local path = type(data) == 'string' and data or fileName
-            Audit.Log(src, 'screenshot', { target = tid, targetName = tname, license = license, detail = path })
-            if PlayerOnline(src) then
-                notify(src, L('screenshot_saved', tname, path), 'success')
-            end
+            Shots.Save(license, tname, src, data, function(id)
+                if not id then
+                    print('^3[fivex_admin] screenshot could not be stored (database not ready)^7')
+                    if PlayerOnline(src) then notify(src, L('screenshot_fail'), 'error') end
+                    return
+                end
+                Audit.Log(src, 'screenshot', { target = tid, targetName = tname, license = license, detail = ('#%d'):format(id) })
+                if PlayerOnline(src) then
+                    notify(src, L('screenshot_saved', tname), 'success')
+                    if PlayerOnline(tid) then pushRecord(src, tid) end
+                end
+            end)
         end)
     end)
     if not ok then

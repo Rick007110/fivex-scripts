@@ -42,6 +42,16 @@ Config.BanDurations = {
 Config.MaxReasonLength = 200
 Config.MinReasonLength = 3
 Config.MaxAnnounceLength = 240
+--- Staff → Announcement uses txAdmin's announcement popup (and its server log) when txAdmin runs.
+--- Falls back to the FiveX Admin popup without txAdmin or with txAdmin-hideDefaultAnnouncement set.
+Config.AnnounceViaTxAdmin = true
+
+--- Player screenshots (screenshot-basic) are stored in MySQL (table fivex_admin_screenshots) and shown
+--- under the player's Screenshots tab. Older ones beyond keepPerPlayer are deleted automatically.
+Config.Screenshots = {
+    quality = 0.6,       -- JPEG quality 0–1
+    keepPerPlayer = 25,
+}
 Config.MaxPlateLength = 8
 
 --- Rate limits: max actions per window (ms).

@@ -12,20 +12,10 @@ local function nui(msg)
     SendNUIMessage(msg)
 end
 
-function Notify(message, ntype)
-    ntype = ntype or 'info'
-    if GetResourceState('ox_lib') == 'started' then
-        pcall(function()
-            exports.ox_lib:notify({ description = message, type = ntype == 'error' and 'error' or (ntype == 'success' and 'success' or 'inform') })
-        end)
-    else
-        BeginTextCommandThefeedPost('STRING')
-        AddTextComponentSubstringPlayerName(message or '')
-        EndTextCommandThefeedPostTicker(false, false)
-    end
-    if MenuOpen then
-        nui({ type = 'toast', message = message, level = ntype })
-    end
+-- One notification style: the FiveX toast (bottom right). It sits outside the menu, so it also
+-- shows while the menu is closed.
+function Notify(message, ntype, ms)
+    nui({ type = 'toast', message = message, level = ntype or 'info', ms = ms })
 end
 
 local function setFocus(on)
@@ -118,16 +108,11 @@ end)
 
 RegisterNetEvent('fivex_admin:announce', function(author, message)
     nui({ type = 'announce', author = author, message = message })
-    BeginTextCommandThefeedPost('STRING')
-    AddTextComponentSubstringPlayerName(('~b~%s~s~: %s'):format(author or 'Staff', message or ''))
-    EndTextCommandThefeedPostTicker(false, true)
 end)
 
 RegisterNetEvent('fivex_admin:staffMessage', function(author, message)
-    Notify(('Staff (%s): %s'):format(author or 'Staff', message or ''), 'info')
-    BeginTextCommandThefeedPost('STRING')
-    AddTextComponentSubstringPlayerName(('~y~Staff~s~ (%s): %s'):format(author or 'Staff', message or ''))
-    EndTextCommandThefeedPostTicker(false, true)
+    -- longer than a normal toast so there is time to read it
+    Notify(('Staff (%s): %s'):format(author or 'Staff', message or ''), 'info', 9000)
 end)
 
 RegisterNetEvent('fivex_admin:worldSync', function(state)
@@ -216,6 +201,16 @@ end)
 RegisterNUICallback('refreshResources', function(_, cb)
     TriggerServerEvent('fivex_admin:refreshResources')
     cb({ ok = true })
+end)
+
+RegisterNUICallback('screenshotImage', function(data, cb)
+    local id = tonumber(data and data.id)
+    if id then TriggerServerEvent('fivex_admin:screenshotImage', id) end
+    cb({ ok = true })
+end)
+
+RegisterNetEvent('fivex_admin:screenshotImage', function(shot)
+    nui({ type = 'shotImage', shot = shot or {} })
 end)
 
 RegisterNUICallback('playerRecord', function(data, cb)

@@ -210,13 +210,13 @@
   }
   function pingClass(ms) { return ms < 80 ? 'good' : (ms < 160 ? 'mid' : 'bad'); }
 
-  function toast(message, level) {
+  function toast(message, level, ms) {
     if (!message) return;
     const el = document.createElement('div');
     el.className = `toast ${level || 'info'}`;
     el.textContent = message;
     toasts.appendChild(el);
-    setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 220); }, 4000);
+    setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 220); }, Number(ms) > 0 ? Number(ms) : 4000);
     while (toasts.children.length > 4) toasts.firstChild.remove();
   }
 
@@ -493,6 +493,13 @@
         ${!rec ? `<p class="muted">Loading record…</p>` : (notes.length ? notes.map((n) => `<div class="record"><div class="record-text">${esc(n.text || '')}</div>
           <div class="record-meta">${esc(n.staffName || 'Staff')} · ${fmtTs(n.created)}</div></div>`).join('') : empty('msg', 'No notes yet.'))}`;
     }
+    if (tab === 'shots') {
+      const shots = (rec && rec.shots) || [];
+      return !rec ? `<p class="muted">Loading record…</p>` : (shots.length ? `<div class="shots">${shots.map((x) => `<button type="button" class="shot-row" data-shot="${esc(x.id)}">
+          <span class="shot-ic">${ico('camera')}</span><span class="grow"><span class="shot-when">${fmtTs(x.created)}</span>
+          <span class="record-meta">${esc(x.staffName || 'Staff')} · ${ago(x.created)}</span></span><span class="shot-open">View</span></button>`).join('')}</div>`
+        : empty('camera', 'No screenshots of this player yet.'));
+    }
     if (tab === 'warns') {
       const warns = (rec && rec.warns) || [];
       return !rec ? `<p class="muted">Loading record…</p>` : (warns.length ? warns.map((w) => `<div class="record"><div class="record-text">${esc(w.reason || '')}</div>
@@ -512,7 +519,10 @@
     const rec = record(p);
     const nNotes = rec ? (rec.notes || []).length : '';
     const nWarns = rec ? (rec.warns || []).length : '';
-    const tabs = [['actions', 'Actions', ''], ['notes', 'Notes', nNotes], ['warns', 'Warnings', nWarns], ['ids', 'Identifiers', '']];
+    const nShots = rec ? (rec.shots || []).length : '';
+    const tabs = [['actions', 'Actions', ''], ['notes', 'Notes', nNotes], ['warns', 'Warnings', nWarns]];
+    if (can('ply.screenshot')) tabs.push(['shots', 'Screenshots', nShots]);
+    tabs.push(['ids', 'Identifiers', '']);
     return `<div class="detail">
       <div class="detail-head" id="detail-head">${detailHeadHtml(p)}</div>
       <div class="detail-tabs">${tabs.map(([id, label, n]) => `<button type="button" class="${state.detailTab === id ? 'active' : ''}" data-dtab="${id}">${label}${n !== '' ? `<span class="count">${n}</span>` : ''}</button>`).join('')}</div>
@@ -772,13 +782,14 @@
         <div class="row" style="justify-content:flex-end"><button class="btn primary" type="submit">${ico('megaphone')}<span>Broadcast to everyone</span></button></div>
       </form>` : `<p class="muted">You don't have the announce permission.</p>`;
     const res = can('staff.restart') ? `<div style="margin-bottom:10px" class="row nowrap"><div class="grow">${searchBox('f-res', state.filters.res, 'Filter resources')}</div><button type="button" class="btn" id="btn-refresh-res">${ico('refresh')}</button></div>
-      <div class="table-wrap" id="res-table" style="max-height:340px">${resourceRowsHtml()}</div>` : `<p class="muted">You don't have the resource permission.</p>`;
-    return `<div class="cols-2">
-      <div class="stack">
+      <div class="table-wrap" id="res-table">${resourceRowsHtml()}</div>` : `<p class="muted">You don't have the resource permission.</p>`;
+    // left column scrolls on its own; the resources card takes the full height of the page
+    return `<div class="cols-2 staff-grid">
+      <div class="stack staff-side">
         ${card('Announcement', 'megaphone', announce)}
         ${card('Your permissions', 'lock', `<div class="row">${(state.aces || []).map((a) => `<span class="badge">${esc(a)}</span>`).join('') || '<span class="muted">None listed</span>'}</div>`)}
       </div>
-      ${card('Resources', 'box', res)}
+      ${card('Resources', 'box', res, 'card-fill')}
     </div>`;
   }
 
@@ -791,7 +802,7 @@
     players: renderPlayers, self: renderSelf, vehicles: renderVehicles, weapons: renderWeapons, entities: renderEntities,
     teleport: renderTeleport, world: renderWorld, bans: renderBans, audit: renderAudit, staff: renderStaff, dev: renderDev,
   };
-  const FILL = { players: 1, audit: 1, bans: 1 };
+  const FILL = { players: 1, audit: 1, bans: 1, staff: 1 };
 
   function render() {
     renderNav();
@@ -801,7 +812,30 @@
     $('page-sub').textContent = s.id === 'players' ? `${state.players.length} online · ${s.sub}` : s.sub;
     content.innerHTML = (PAGES[state.category] || renderPlayers)();
     content.classList.toggle('fill', !!FILL[state.category]);
+    content.querySelectorAll('input.range').forEach(paintRange);
     $('brand-sub').textContent = `${state.players.length} online · ${state.actions.length} actions`;
+  }
+
+  // Screenshot viewer: the image is read from the database only when it is opened
+  function openShot(id) {
+    state.shotId = id;
+    $('shot-title').textContent = 'Screenshot';
+    $('shot-meta').textContent = '';
+    $('shot-frame').innerHTML = '<div class="muted">Loading…</div>';
+    $('shot-view').classList.remove('hidden');
+    post('screenshotImage', { id });
+  }
+  function closeShot() {
+    state.shotId = null;
+    $('shot-view').classList.add('hidden');
+    $('shot-frame').innerHTML = '';
+  }
+
+  // Range sliders: the filled part of the track follows the value (--p, 0–100%)
+  function paintRange(el) {
+    const min = Number(el.min) || 0, max = Number(el.max) || 100;
+    const p = max > min ? ((Number(el.value) - min) / (max - min)) * 100 : 0;
+    el.style.setProperty('--p', `${p}%`);
   }
 
   // Live player refresh: only touch what changed so inputs keep focus
@@ -921,6 +955,10 @@
     post('action', { id, payload });
   });
   $('modal-cancel').addEventListener('click', () => modal.classList.add('hidden'));
+  // the viewer sits outside #app, so it needs its own listener: Close, or a click on the dark backdrop
+  $('shot-view').addEventListener('click', (e) => {
+    if (e.target.closest('#shot-close') || e.target.id === 'shot-view') closeShot();
+  });
 
   // ── Command palette ───────────────────────────────────────────────────
   // Ranked match: label prefix > word start > substring > keywords/category > loose letters in the label
@@ -1039,6 +1077,9 @@
     const cp = target.closest('[data-copy]');
     if (cp) { copyText(cp.dataset.copy); return; }
 
+    const shot = target.closest('[data-shot]');
+    if (shot) { openShot(shot.dataset.shot); return; }
+
     const dtab = target.closest('[data-dtab]');
     if (dtab) { state.detailTab = dtab.dataset.dtab; refreshDetailBody(); return; }
 
@@ -1124,6 +1165,7 @@
   }
 
   content.addEventListener('input', (e) => {
+    if (e.target.matches && e.target.matches('input.range')) paintRange(e.target);
     const el = e.target;
     switch (el.id) {
       case 'f-players': state.filters.players = el.value; { const l = $('player-list'); if (l) l.innerHTML = playerRowsHtml(); } break;
@@ -1163,6 +1205,7 @@
     if (k === 'Escape') {
       e.preventDefault();
       if (state.palette.open) closePalette();
+      else if (!$('shot-view').classList.contains('hidden')) closeShot();
       else if (!modal.classList.contains('hidden')) modal.classList.add('hidden');
       else post('close', {});
       return;
@@ -1296,8 +1339,23 @@
           if (state.open) refreshPlayersLive(true);
         } else if (state.open) refreshPlayersLive(false);
         break;
+      case 'shotImage': {
+        const x = d.shot || {};
+        if ($('shot-view').classList.contains('hidden') || String(x.id) !== String(state.shotId)) break;
+        if (x.missing || typeof x.image !== 'string' || !x.image.startsWith('data:image/')) {
+          $('shot-frame').innerHTML = empty('camera', 'This screenshot no longer exists.');
+          break;
+        }
+        $('shot-title').textContent = `Screenshot of ${x.targetName || 'player'}`;
+        $('shot-meta').textContent = `${fmtTs(x.created)} · by ${x.staffName || 'Staff'}`;
+        const img = new Image();
+        img.alt = 'Screenshot';
+        img.src = x.image;
+        $('shot-frame').replaceChildren(img);
+        break;
+      }
       case 'toast':
-        toast(d.message, d.level);
+        toast(d.message, d.level, d.ms);
         break;
       case 'clipboard':
         copyText(d.text);

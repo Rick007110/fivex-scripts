@@ -4,7 +4,7 @@ lua54 'yes'
 
 name 'fivex_admin'
 author 'FiveX'
-version '1.1.1'
+version '1.2.0'
 repository 'Rick007110/fivex-scripts'
 description 'Standalone ACE-gated staff/admin menu with a professional NUI'
 
@@ -46,6 +46,7 @@ server_scripts {
     'server/players.lua',
     'server/world.lua',
     'server/records.lua',
+    'server/screenshots.lua',
     'server/main.lua',
 }
 

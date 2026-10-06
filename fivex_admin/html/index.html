@@ -77,6 +77,15 @@
     </form>
   </div>
 
+  <!-- Screenshot viewer -->
+  <div id="shot-view" class="overlay shot-overlay hidden" role="dialog" aria-modal="true" aria-label="Screenshot">
+    <div class="shot-box">
+      <div class="shot-head"><div class="shot-title" id="shot-title">Screenshot</div><div class="shot-meta muted" id="shot-meta"></div>
+        <button type="button" class="btn sm" id="shot-close" title="Close (Esc)">Close</button></div>
+      <div class="shot-frame" id="shot-frame"></div>
+    </div>
+  </div>
+
   <!-- Server announcement (shown to everyone) -->
   <div id="announce" class="announce hidden">
     <div class="announce-kicker"><span class="dot"></span><span id="announce-author">Announcement</span></div>
